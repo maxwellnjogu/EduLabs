@@ -103,6 +103,10 @@ class RevisionResourceSerializer(serializers.ModelSerializer):
 
 
 class LecturerRecommendedTopicSerializer(serializers.ModelSerializer):
+    topic_name = serializers.CharField(source="title", required=False)
+    subtopics = serializers.CharField(source="description", required=False)
+    justification = serializers.CharField(source="rationale", required=False, allow_blank=True)
+
     class Meta:
         model = LecturerRecommendedTopic
         fields = [
@@ -115,4 +119,17 @@ class LecturerRecommendedTopicSerializer(serializers.ModelSerializer):
             "rationale",
             "is_in_final_test",
             "created_at",
+            "topic_name",
+            "subtopics",
+            "justification",
         ]
+
+    def to_internal_value(self, data):
+        ret = super().to_internal_value(data)
+        if "topic_name" in data and not ret.get("title"):
+            ret["title"] = data["topic_name"]
+        if "subtopics" in data and not ret.get("description"):
+            ret["description"] = data["subtopics"]
+        if "justification" in data and not ret.get("rationale"):
+            ret["rationale"] = data["justification"]
+        return ret

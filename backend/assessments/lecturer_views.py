@@ -626,115 +626,11 @@ class LecturerUnitAnalyticsView(views.APIView):
         except Unit.DoesNotExist:
             return Response({"error": "Unit not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        # Enrolled students
-        enrolments = StudentEnrolment.objects.filter(unit=unit, is_active=True).select_related("student")
-
-        # Get Lab 1 assessment
         lab1 = Assessment.objects.filter(unit=unit, week__week_number=1).first()
 
-        students_cohort = []
-        scores_list = []
-        pass_count = 0
-        fail_count = 0
-        not_attempted_count = 0
-
-        for e in enrolments:
-            student = e.student
-            attempts = AssessmentAttempt.objects.filter(
-                assessment=lab1,
-                student=student,
-                is_completed=True,
-            ).order_by("-attempt_number")
-
-            attempts_count = attempts.count()
-            latest_att = attempts.first()
-            best_att = attempts.order_by("-score").first()
-
-            if attempts_count == 0:
-                not_attempted_count += 1
-                status_str = "NOT_ATTEMPTED"
-                needs_retake = True
-            elif best_att and best_att.passed:
-                pass_count += 1
-                status_str = "PASSED"
-                needs_retake = False
-                scores_list.append(best_att.percentage)
-            else:
-                fail_count += 1
-                status_str = "FAILED"
-                needs_retake = True
-                if latest_att:
-                    scores_list.append(latest_att.percentage)
-
-            students_cohort.append(
-                {
-                    "student_id": student.id,
-                    "student_name": student.get_full_name() or student.username,
-                    "admission_number": student.admission_number,
-                    "attempts_count": attempts_count,
-                    "latest_score": latest_att.percentage if latest_att else None,
-                    "best_score": best_att.percentage if best_att else None,
-                    "status": status_str,
-                    "needs_retake": needs_retake,
-                    "is_demo_data": getattr(latest_att, "is_demo_data", True) if latest_att else False,
-                }
-            )
-
-        avg_score = round(sum(scores_list) / len(scores_list), 1) if scores_list else 0.0
-        total_assessed = pass_count + fail_count
-        pass_rate = round(pass_count / total_assessed * 100.0, 1) if total_assessed > 0 else 0.0
-
-        # Frequently missed questions
-        missed_answers = StudentAnswer.objects.filter(
-            attempt__assessment=lab1,
-            is_correct=False,
-        ).values("question__id", "question__prompt", "question__topic_tag").annotate(
-            missed_count=Count("id")
-        ).order_by("-missed_count")[:5]
-
-        missed_questions = [
-            {
-                "question_id": m["question__id"],
-                "prompt": m["question__prompt"][:80],
-                "topic": m["question__topic_tag"],
-                "missed_count": m["missed_count"],
-            }
-            for m in missed_answers
-        ]
-
-        # Topic weakness breakdown
-        topic_weaknesses = StudentAnswer.objects.filter(
-            attempt__assessment=lab1,
-            is_correct=False,
-        ).values("question__topic_tag").annotate(
-            count=Count("id")
-        ).order_by("-count")[:6]
-
-        weak_topics = [{"topic": tw["question__topic_tag"], "count": tw["count"]} for tw in topic_weaknesses if tw["question__topic_tag"]]
-
-        return Response(
-            {
-                "unit": {
-                    "id": unit.id,
-                    "code": unit.code,
-                    "name": unit.name,
-                },
-                "assessment_title": lab1.title if lab1 else "Week 1 Lab",
-                "cohort_stats": {
-                    "total_enrolled": enrolments.count(),
-                    "total_attempted": total_assessed,
-                    "passed_count": pass_count,
-                    "failed_count": fail_count,
-                    "not_attempted_count": not_attempted_count,
-                    "average_score": avg_score,
-                    "pass_rate_percentage": pass_rate,
-                },
-                "cohort_students": students_cohort,
-                "most_frequently_missed_questions": missed_questions,
-                "weak_topics": weak_topics,
-                "synthetic_data_notice": "Note: Demonstration cohort records are synthetically labeled for hackathon presentation.",
-            }
-        )
+        from assessments.presentation_analytics import get_cohort_analytics_data
+        data = get_cohort_analytics_data(unit, lab1)
+        return Response(data)
 
 
 class LecturerFinalExamApprovalsView(views.APIView):

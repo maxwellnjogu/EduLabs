@@ -178,10 +178,10 @@ export const LecturerRevisionPackPage: React.FC = () => {
                 </span>
               </div>
 
-              <h3 className="text-sm font-bold text-slate-900">{t.topic_name}</h3>
-              <p className="text-xs text-slate-600"><strong>Subtopics:</strong> {t.subtopics}</p>
-              {t.justification && (
-                <p className="text-xs text-slate-500 italic">Lecturer note: {t.justification}</p>
+              <h3 className="text-sm font-bold text-slate-900">{t.topic_name || t.title}</h3>
+              <p className="text-xs text-slate-600"><strong>Subtopics:</strong> {t.subtopics || t.description}</p>
+              {(t.justification || t.rationale) && (
+                <p className="text-xs text-slate-500 italic">Lecturer note: {t.justification || t.rationale}</p>
               )}
             </div>
           ))}

@@ -40,6 +40,7 @@ export const LecturerAssessmentBuilderPage: React.FC = () => {
   const [regeneratingId, setRegeneratingId] = useState<number | null>(null);
   const [actionMsg, setActionMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [activeTab, setActiveTab] = useState<'builder' | 'questions' | 'materials' | 'settings' | 'preview'>('builder');
+  const [showQuestionPreview, setShowQuestionPreview] = useState(false);
 
   // Materials State
   const [materials, setMaterials] = useState<any[]>([]);
@@ -306,16 +307,18 @@ export const LecturerAssessmentBuilderPage: React.FC = () => {
 
   // STEP 3: Generate Questions with AI (Local pre-built SDLC content - ZERO Gemini/paid API calls)
   const handleGenerateQuestionsWithAI = async () => {
-    if (!selectedAssessment) return;
+    if (!selectedAssessment || generating) return;
     setGenerating(true);
     setActionMsg(null);
 
     try {
-      const res = await lecturerApi.generateDemoContent(selectedAssessment.id, false, {
+      await lecturerApi.generateDemoContent(selectedAssessment.id, false, {
         modes: selectedModes,
       });
 
-      // EXACT required success message
+      // Reveal full preview on click
+      setShowQuestionPreview(true);
+
       setActionMsg({
         type: 'success',
         text: 'Prepared SDLC activities generated successfully',
@@ -332,9 +335,9 @@ export const LecturerAssessmentBuilderPage: React.FC = () => {
     }
   };
 
-  // STEP 4: Publish (Exact confirmation: "Publish successful")
+  // STEP 4: Publish (Exact confirmation: "Completed")
   const handlePublish = async () => {
-    if (!selectedAssessment) return;
+    if (!selectedAssessment || publishing) return;
     setPublishing(true);
     setActionMsg(null);
 
@@ -344,10 +347,10 @@ export const LecturerAssessmentBuilderPage: React.FC = () => {
         selected_modes: selectedModes,
       });
 
-      // EXACT confirmation required: "Publish successful"
+      // EXACT required success message: "Completed"
       setActionMsg({
         type: 'success',
-        text: 'Publish successful',
+        text: 'Completed',
       });
 
       await loadAssessmentDetail(selectedAssessment.id);
@@ -417,29 +420,13 @@ export const LecturerAssessmentBuilderPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          {selectedAssessment && (
-            <>
-              <button
-                onClick={handleGenerateQuestionsWithAI}
-                disabled={generating}
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-100 transition-all disabled:opacity-50"
-              >
-                <Sparkles className="w-4 h-4 text-amber-300" />
-                {generating ? 'Generating Local Content...' : 'Generate Questions with AI'}
-              </button>
-
-              <button
-                onClick={handlePublish}
-                disabled={publishing}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-md shadow-brand-600/20 transition-all disabled:opacity-50"
-              >
-                <CheckCircle2 className="w-4 h-4 text-emerald-200" />
-                {publishing ? 'Publishing...' : 'Publish'}
-              </button>
-            </>
-          )}
-        </div>
+        {selectedAssessment && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-200">
+              Status: <strong className="capitalize text-slate-900">{selectedAssessment.status}</strong>
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Confirmation Notification Alert */}
@@ -803,150 +790,167 @@ export const LecturerAssessmentBuilderPage: React.FC = () => {
                     </div>
 
                     {/* Button labelled Generate Questions with AI */}
-                    <button
-                      onClick={handleGenerateQuestionsWithAI}
-                      disabled={generating || selectedModes.length === 0}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-100 transition disabled:opacity-50 self-start sm:self-auto"
-                    >
-                      <Sparkles className="w-4 h-4 text-amber-300" />
-                      <span>{generating ? 'Loading Prepared Activities...' : 'Generate Questions with AI'}</span>
-                    </button>
+                    <div className="flex items-center gap-2 self-start sm:self-auto">
+                      {showQuestionPreview && (
+                        <button
+                          type="button"
+                          onClick={() => setShowQuestionPreview(false)}
+                          className="px-3 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
+                        >
+                          Collapse Preview
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={handleGenerateQuestionsWithAI}
+                        disabled={generating || selectedModes.length === 0}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-100 transition disabled:opacity-50"
+                      >
+                        <Sparkles className="w-4 h-4 text-amber-300" />
+                        <span>{generating ? 'Loading Prepared Activities...' : 'Generate Questions with AI'}</span>
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Lecturer Preview Area */}
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                        Lecturer Assessment Preview ({previewQuestions.length} Questions for Selected Modes)
-                      </h4>
-                      <span className="text-xs text-slate-500">
-                        Review answers, explanations, timers and rubrics before publishing.
-                      </span>
-                    </div>
-
-                    {previewQuestions.length === 0 ? (
-                      <div className="p-8 border-2 border-dashed border-slate-200 rounded-xl text-center space-y-2">
-                        <Sparkles className="w-8 h-8 text-amber-500 mx-auto" />
-                        <h5 className="text-xs font-bold text-slate-800">No Questions Previewed for Selected Modes</h5>
-                        <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
-                          Click <strong>"Generate Questions with AI"</strong> above to populate the prepared SDLC questions for your selected modes.
-                        </p>
+                  {/* Lecturer Preview Area — Collapsed by default until Generate Questions with AI is clicked */}
+                  {showQuestionPreview && (
+                    <div className="space-y-4 pt-1">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                          Lecturer Assessment Preview ({previewQuestions.length} Questions for Selected Modes)
+                        </h4>
+                        <span className="text-xs text-slate-500">
+                          Review answers, explanations, timers and rubrics before publishing.
+                        </span>
                       </div>
-                    ) : (
-                      <div className="space-y-3.5">
-                        {previewQuestions.map((q: any, idx: number) => (
-                          <div
-                            key={q.id}
-                            className="p-4 rounded-xl border border-slate-200 bg-slate-50/40 hover:bg-slate-50 transition space-y-2"
-                          >
-                            <div className="flex items-center justify-between text-xs">
-                              <div className="flex items-center gap-2">
-                                <span className="font-bold text-slate-700 bg-slate-200 px-2 py-0.5 rounded">
-                                  #{idx + 1}
-                                </span>
-                                <span className="font-bold uppercase text-brand-700 bg-brand-50 border border-brand-200 px-2 py-0.5 rounded text-[10px]">
-                                  {q.question_type}
-                                </span>
-                                <span className="font-medium text-slate-600 text-[11px]">
-                                  {q.marks} Mark(s) • <Clock className="w-3 h-3 inline text-slate-400" /> {q.timer_seconds || 15}s Timer
+
+                      {previewQuestions.length === 0 ? (
+                        <div className="p-8 border-2 border-dashed border-slate-200 rounded-xl text-center space-y-2">
+                          <Sparkles className="w-8 h-8 text-amber-500 mx-auto" />
+                          <h5 className="text-xs font-bold text-slate-800">No Questions Previewed for Selected Modes</h5>
+                          <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
+                            Click <strong>"Generate Questions with AI"</strong> above to populate the prepared SDLC questions for your selected modes.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3.5">
+                          {previewQuestions.map((q: any, idx: number) => (
+                            <div
+                              key={q.id}
+                              className="p-4 rounded-xl border border-slate-200 bg-slate-50/40 hover:bg-slate-50 transition space-y-2"
+                            >
+                              <div className="flex items-center justify-between text-xs">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-bold text-slate-700 bg-slate-200 px-2 py-0.5 rounded">
+                                    #{idx + 1}
+                                  </span>
+                                  <span className="font-bold uppercase text-brand-700 bg-brand-50 border border-brand-200 px-2 py-0.5 rounded text-[10px]">
+                                    {q.question_type}
+                                  </span>
+                                  <span className="font-medium text-slate-600 text-[11px]">
+                                    {q.marks} Mark(s) • <Clock className="w-3 h-3 inline text-slate-400" /> {q.timer_seconds || 15}s Timer
+                                  </span>
+                                </div>
+                                <span className="text-[10px] text-slate-500 font-medium">
+                                  Topic: {q.topic_tag}
                                 </span>
                               </div>
-                              <span className="text-[10px] text-slate-500 font-medium">
-                                Topic: {q.topic_tag}
-                              </span>
+
+                              <p className="text-xs font-bold text-slate-900 leading-snug">{q.prompt}</p>
+
+                              {/* MCQ Options with marked correct answer */}
+                              {q.options && q.options.length > 0 && (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
+                                  {q.options.map((opt: any) => (
+                                    <div
+                                      key={opt.id}
+                                      className={`text-xs px-3 py-1.5 rounded-lg flex items-center justify-between ${
+                                        opt.is_correct
+                                          ? 'bg-emerald-50 text-emerald-900 border border-emerald-300 font-bold'
+                                          : 'bg-white text-slate-600 border border-slate-200'
+                                      }`}
+                                    >
+                                      <span>{opt.option_text}</span>
+                                      {opt.is_correct && (
+                                        <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-emerald-600 text-white flex items-center gap-0.5">
+                                          <Check className="w-3 h-3" /> Correct
+                                        </span>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                              {/* Matching Pairs preview */}
+                              {q.matching_pairs && q.matching_pairs.length > 0 && (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
+                                  {q.matching_pairs.map((pair: any, pIdx: number) => (
+                                    <div key={pIdx} className="text-xs p-2.5 rounded-lg bg-white border border-slate-200">
+                                      <strong className="text-indigo-900">{pair.term || pair.phase}:</strong>{' '}
+                                      <span className="text-slate-600">{pair.definition || `Order: ${pair.order}`}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                              {/* Explanation / Rubric */}
+                              {q.explanation && (
+                                <div className="text-[11px] text-slate-600 bg-white p-2 rounded-lg border border-slate-200">
+                                  <strong>Explanation:</strong> {q.explanation}
+                                </div>
+                              )}
+                              {q.marking_rubric && (
+                                <div className="text-[11px] text-amber-800 bg-amber-50 p-2 rounded-lg border border-amber-200 font-mono">
+                                  <strong>Rubric:</strong> {q.marking_rubric}
+                                </div>
+                              )}
                             </div>
-
-                            <p className="text-xs font-bold text-slate-900 leading-snug">{q.prompt}</p>
-
-                            {/* MCQ Options with marked correct answer */}
-                            {q.options && q.options.length > 0 && (
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
-                                {q.options.map((opt: any) => (
-                                  <div
-                                    key={opt.id}
-                                    className={`text-xs px-3 py-1.5 rounded-lg flex items-center justify-between ${
-                                      opt.is_correct
-                                        ? 'bg-emerald-50 text-emerald-900 border border-emerald-300 font-bold'
-                                        : 'bg-white text-slate-600 border border-slate-200'
-                                    }`}
-                                  >
-                                    <span>{opt.option_text}</span>
-                                    {opt.is_correct && (
-                                      <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-emerald-600 text-white flex items-center gap-0.5">
-                                        <Check className="w-3 h-3" /> Correct
-                                      </span>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-
-                            {/* Matching Pairs preview */}
-                            {q.matching_pairs && q.matching_pairs.length > 0 && (
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
-                                {q.matching_pairs.map((pair: any, pIdx: number) => (
-                                  <div key={pIdx} className="text-xs p-2.5 rounded-lg bg-white border border-slate-200">
-                                    <strong className="text-indigo-900">{pair.term || pair.phase}:</strong>{' '}
-                                    <span className="text-slate-600">{pair.definition || `Order: ${pair.order}`}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-
-                            {/* Explanation / Rubric */}
-                            {q.explanation && (
-                              <div className="text-[11px] text-slate-600 bg-white p-2 rounded-lg border border-slate-200">
-                                <strong>Explanation:</strong> {q.explanation}
-                              </div>
-                            )}
-                            {q.marking_rubric && (
-                              <div className="text-[11px] text-amber-800 bg-amber-50 p-2 rounded-lg border border-amber-200 font-mono">
-                                <strong>Rubric:</strong> {q.marking_rubric}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* ======================================================== */}
-                {/* STEP 4: PUBLISH */}
+                {/* STEP 4: PUBLISH (Displayed after questions have been generated and previewed) */}
                 {/* ======================================================== */}
-                <div className="p-6 rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-lg space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <span className="w-7 h-7 rounded-full bg-emerald-500 text-white font-bold text-xs flex items-center justify-center">
-                        4
-                      </span>
-                      <div>
-                        <h3 className="text-base font-bold text-white">Step 4: Publish Assessment</h3>
-                        <p className="text-xs text-slate-300">
-                          Save your selected testing modes and review configuration. Students can immediately access materials and take the lab.
-                        </p>
+                {showQuestionPreview && previewQuestions.length > 0 && (
+                  <div className="p-6 rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-lg space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <span className="w-7 h-7 rounded-full bg-emerald-500 text-white font-bold text-xs flex items-center justify-center">
+                          4
+                        </span>
+                        <div>
+                          <h3 className="text-base font-bold text-white">Step 4: Publish Assessment</h3>
+                          <p className="text-xs text-slate-300">
+                            Save your selected testing modes and review configuration. Students can immediately access materials and take the lab.
+                          </p>
+                        </div>
                       </div>
+
+                      {/* Publish Button */}
+                      <button
+                        type="button"
+                        onClick={handlePublish}
+                        disabled={publishing}
+                        className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                      >
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>{publishing ? 'Publishing...' : 'Publish'}</span>
+                      </button>
                     </div>
 
-                    {/* Publish Button */}
-                    <button
-                      onClick={handlePublish}
-                      disabled={publishing}
-                      className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition disabled:opacity-50 flex items-center justify-center gap-2"
-                    >
-                      <CheckCircle2 className="w-4 h-4" />
-                      <span>{publishing ? 'Publishing...' : 'Publish'}</span>
-                    </button>
+                    <div className="pt-2 border-t border-slate-700/60 flex items-center justify-between text-xs text-slate-400">
+                      <span>
+                        Current Status: <strong className="text-white capitalize">{selectedAssessment.status}</strong> • Total Marks:{' '}
+                        <strong className="text-emerald-400">{selectedAssessment.total_marks} pts</strong>
+                      </span>
+                      <span>Publishing does not duplicate existing questions or attempts.</span>
+                    </div>
                   </div>
-
-                  <div className="pt-2 border-t border-slate-700/60 flex items-center justify-between text-xs text-slate-400">
-                    <span>
-                      Current Status: <strong className="text-white capitalize">{selectedAssessment.status}</strong> • Total Marks:{' '}
-                      <strong className="text-emerald-400">{selectedAssessment.total_marks} pts</strong>
-                    </span>
-                    <span>Publishing does not duplicate existing questions or attempts.</span>
-                  </div>
-                </div>
+                )}
               </div>
             )}
 

@@ -406,21 +406,46 @@ class Command(BaseCommand):
 
         # 9. Revision Resources & Recommended Topics
         topics_spec = [
-            ("Requirement Elicitation & SME Collaboration", "High-frequency topic: formulating unambiguous functional requirements with stakeholders.", LecturerRecommendedTopic.Priority.HIGH),
-            ("Architectural Design & DB Schema Modeling", "Key topic on module cohesion, loose coupling, and normalization.", LecturerRecommendedTopic.Priority.HIGH),
-            ("Testing Tiers: Unit vs Integration vs System vs UAT", "Essential quality assurance concepts frequently tested in final assessments.", LecturerRecommendedTopic.Priority.HIGH),
-            ("Agile Scrum Sprint Ceremonies & Backlog Grooming", "Scrum framework roles, ceremonies, artifacts, and sprint timelines.", LecturerRecommendedTopic.Priority.MEDIUM),
-            ("Three-Tier Environment Deployment & Isolation", "Development, QA, and Production segregation, security implications, and release management.", LecturerRecommendedTopic.Priority.MEDIUM),
+            (
+                "Software Development Lifecycle & Methodology Selection",
+                "Waterfall vs Agile vs Spiral, SDLC phases (Planning, Requirements, Design, Implementation, Testing, Maintenance), Feasibility study",
+                LecturerRecommendedTopic.Priority.HIGH,
+                "Core foundation tested in both Lab 1 and the final exam; required for architectural decisions.",
+            ),
+            (
+                "Requirements Engineering & SRS Documentation",
+                "Functional vs Non-Functional requirements, IEEE 830 standard, Use Case modeling, Stakeholder interviews",
+                LecturerRecommendedTopic.Priority.HIGH,
+                "Frequent student misunderstanding between functional specifications and operational constraints.",
+            ),
+            (
+                "Software Design Principles & Architectural Patterns",
+                "SOLID principles, Design patterns (Singleton, Factory, Observer), Microservices vs Monolith, Cohesion & Coupling",
+                LecturerRecommendedTopic.Priority.HIGH,
+                "Critical for evaluating clean architecture and maintainable system structure.",
+            ),
+            (
+                "Software Quality Assurance & Testing Strategies",
+                "Unit vs Integration vs System vs UAT, Black-box vs White-box, Test-Driven Development (TDD), CI test automation",
+                LecturerRecommendedTopic.Priority.MEDIUM,
+                "High error rate observed in test isolation and mock boundaries during lab evaluations.",
+            ),
+            (
+                "Database Design, Normalization & Security",
+                "1NF to BCNF normalization, ACID transactions, SQL injection prevention, Indexing strategies",
+                LecturerRecommendedTopic.Priority.MEDIUM,
+                "Essential for secure backend data handling and query performance in enterprise systems.",
+            ),
         ]
-        for t_title, t_desc, t_prio in topics_spec:
-            LecturerRecommendedTopic.objects.get_or_create(
+        for t_title, t_subtopics, t_prio, t_reason in topics_spec:
+            topic_obj, _ = LecturerRecommendedTopic.objects.update_or_create(
                 unit=se_unit,
                 semester=semester,
                 title=t_title,
                 defaults={
-                    "description": t_desc,
+                    "description": t_subtopics,
                     "priority": t_prio,
-                    "rationale": "Identified by lecturer James Mwangi as essential for end-of-semester exam readiness.",
+                    "rationale": t_reason,
                     "is_in_final_test": True,
                 },
             )
