@@ -1,0 +1,93 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 1634 >>
+stream
+BT
+/F2 18 Tf
+50 760 Td
+(Software Testing Strategies & Quality Assurance) Tj
+/F1 10 Tf
+0 -18 Td
+(RCS 305 ? Software Engineering | Riara University Revision Resource) Tj
+ET
+0.35 0.15 0.55 RG
+2 w
+50 730 m 550 730 l S
+BT
+50 705 Td
+/F2 12 Tf
+0 -24 Td
+(1. QA vs. Testing) Tj
+/F1 9 Tf
+0 -13 Td
+(Quality Assurance \(QA\) is process-oriented, focusing on defect prevention across) Tj
+0 -13 Td
+(all engineering workflows. Testing is product-oriented, focusing on defect) Tj
+0 -13 Td
+(identification through dynamic execution.) Tj
+/F2 12 Tf
+0 -24 Td
+(2. The Modern Test Pyramid) Tj
+/F1 9 Tf
+0 -13 Td
+(? Unit Tests \(Base\): High volume, fast execution, isolated tests exercising) Tj
+0 -13 Td
+(individual functions or classes with test doubles \(mocks/stubs\).) Tj
+0 -13 Td
+(? Integration Tests \(Middle\): Verifies database transactions, API contract) Tj
+0 -13 Td
+(boundaries, and inter-service messaging.) Tj
+0 -13 Td
+(? System / End-to-End Tests \(Peak\): Simulates authentic user workflows through) Tj
+0 -13 Td
+(browser UI or API gateway under realistic network conditions.) Tj
+/F2 12 Tf
+0 -24 Td
+(3. Black-Box vs. White-Box Methodologies) Tj
+/F1 9 Tf
+0 -13 Td
+(? Black-Box Testing: Evaluates external functionality without visibility into) Tj
+0 -13 Td
+(internal source code \(Equivalence Partitioning, Boundary Value Analysis, State) Tj
+0 -13 Td
+(Transition testing\).) Tj
+0 -13 Td
+(? White-Box Testing: Employs code structure knowledge to achieve Statement,) Tj
+0 -13 Td
+(Branch, and Condition Coverage benchmarks.) Tj
+/F1 8 Tf
+0 -30 Td
+(MaxLabs Academic Revision Document -- Copyright Riara University Design Thinking Prototype 2026) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000121 00000 n 
+0000000257 00000 n 
+0000001943 00000 n 
+0000002013 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+2088
+%%EOF

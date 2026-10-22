@@ -1,0 +1,131 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 3124 >>
+stream
+BT
+/F2 18 Tf
+50 760 Td
+(Software Development Life Cycle \(SDLC\)) Tj
+/F1 10 Tf
+0 -18 Td
+(RCS 305 ? Software Engineering | Riara University Revision Resource) Tj
+ET
+0.35 0.15 0.55 RG
+2 w
+50 730 m 550 730 l S
+BT
+50 705 Td
+/F2 12 Tf
+0 -24 Td
+(1. Introduction & Overview) Tj
+/F1 9 Tf
+0 -13 Td
+(The Software Development Life Cycle \(SDLC\) is a structured framework that guides) Tj
+0 -13 Td
+(the conception, specification, development, verification, deployment, and) Tj
+0 -13 Td
+(operational maintenance of reliable software systems. By enforcing defined) Tj
+0 -13 Td
+(milestones and quality gates between phases, SDLC disciplines prevent runaway) Tj
+0 -13 Td
+(defect costs and align engineering outputs with institutional and stakeholder) Tj
+0 -13 Td
+(requirements.) Tj
+/F2 12 Tf
+0 -24 Td
+(2. Core Architectural Phases) Tj
+/F1 9 Tf
+0 -13 Td
+(A standard software engineering lifecycle comprises five core stages:) Tj
+0 -13 Td
+(? Requirement Analysis: Eliciting user needs, evaluating operational constraints,) Tj
+0 -13 Td
+(and drafting unambiguous Functional & Non-Functional Specifications.) Tj
+0 -13 Td
+(? Architectural Design: Structuring multi-tier architectures, data schemas,) Tj
+0 -13 Td
+(module cohesion, interface contracts, and component decoupling.) Tj
+0 -13 Td
+(? Implementation: Coding clean, documented, and modular routines adhering to) Tj
+0 -13 Td
+(established language guidelines and peer review standards.) Tj
+0 -13 Td
+(? Verification & Testing: Subjecting software to unit, integration, system, and) Tj
+0 -13 Td
+(user acceptance test suites to detect regressions before release.) Tj
+0 -13 Td
+(? Evolution & Maintenance: Addressing post-deployment defects, adapting to) Tj
+0 -13 Td
+(updated operational runtime environments, and enhancing capabilities.) Tj
+/F2 12 Tf
+0 -24 Td
+(3. The Defect Amplification Model \(Boehm's Law\)) Tj
+/F1 9 Tf
+0 -13 Td
+(Empirical studies demonstrate that defect remediation costs increase) Tj
+0 -13 Td
+(exponentially across successive SDLC phases. A requirement ambiguity resolved) Tj
+0 -13 Td
+(during initial analysis costs approximately 1x to fix. The same defect discovered) Tj
+0 -13 Td
+(during coding costs 5x, during integration testing costs 10x, and post-deployment) Tj
+0 -13 Td
+(in production exceeds 30x to 100x. Systematic upstream verification is therefore) Tj
+0 -13 Td
+(essential.) Tj
+/F2 12 Tf
+0 -24 Td
+(4. Multi-Tier Operational Environments) Tj
+/F1 9 Tf
+0 -13 Td
+(Enterprise deployment mandates strict physical or logical separation between) Tj
+0 -13 Td
+(operational environments:) Tj
+0 -13 Td
+(? Development \(Dev\): Dynamic, unstable staging environment for rapid prototyping) Tj
+0 -13 Td
+(and unit testing.) Tj
+0 -13 Td
+(? Quality Assurance \(QA\): Isolated replica of production infrastructure executing) Tj
+0 -13 Td
+(automated regression suites, load testing, and UAT sign-offs.) Tj
+0 -13 Td
+(? Production \(Prod\): Live, monitored environment delivering services to) Tj
+0 -13 Td
+(authenticated end users under rigorous change control.) Tj
+/F1 8 Tf
+0 -30 Td
+(MaxLabs Academic Revision Document -- Copyright Riara University Design Thinking Prototype 2026) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000121 00000 n 
+0000000257 00000 n 
+0000003433 00000 n 
+0000003503 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+3578
+%%EOF
