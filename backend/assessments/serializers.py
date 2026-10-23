@@ -63,16 +63,21 @@ class AssessmentQuestionReviewSerializer(serializers.ModelSerializer):
             "explanation",
             "marking_rubric",
             "matching_pairs",
+            "config",
             "options",
             "order",
+            "is_active",
         ]
 
 
 class AssessmentSerializer(serializers.ModelSerializer):
-    questions_count = serializers.IntegerField(source="questions.count", read_only=True)
+    questions_count = serializers.SerializerMethodField()
     week_number = serializers.IntegerField(source="week.week_number", read_only=True)
     unit_code = serializers.CharField(source="unit.code", read_only=True)
     passing_threshold_percentage = serializers.FloatField(source="passing_threshold", read_only=True)
+
+    def get_questions_count(self, obj):
+        return obj.questions.filter(is_active=True).count()
 
     class Meta:
         model = Assessment
@@ -97,6 +102,7 @@ class AssessmentSerializer(serializers.ModelSerializer):
             "allow_retakes",
             "max_retakes",
             "reveal_answers",
+            "activity_config",
             "questions_count",
             "created_at",
             "updated_at",

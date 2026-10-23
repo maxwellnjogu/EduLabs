@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { api } from "../../api/client";
 import {
   BookOpen,
@@ -16,9 +16,12 @@ import {
   Eye,
   Layers,
   Inbox,
+  GitBranch,
 } from "lucide-react";
 import { AITutorDrawer } from "../../components/common/AITutorDrawer";
 import { MarkdownRenderer } from "../../components/common/MarkdownRenderer";
+import { SDLCMindMapViewer } from "../../components/learning/SDLCMindMapViewer";
+import { SDLCFlashcardsAndPracticeSection } from "../../components/learning/SDLCFlashcardsAndPracticeSection";
 
 function getYouTubeEmbedUrl(url?: string): string | null {
   if (!url) return null;
@@ -29,12 +32,21 @@ function getYouTubeEmbedUrl(url?: string): string | null {
 
 export const StudentWeekLearningPage: React.FC = () => {
   const { unitId, weekNumber, weekId } = useParams<{ unitId?: string; weekNumber?: string; weekId?: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [data, setData] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<string>("all");
+  const initialTab = searchParams.get("tab") || "all";
+  const [activeTab, setActiveTab] = useState<string>(initialTab);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [expandedQuestions, setExpandedQuestions] = useState<Record<number, boolean>>({});
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam && ["all", "notes", "docs", "images", "videos", "mindmap", "flashcards", "practice"].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
 
   const targetWeek = weekNumber ? parseInt(weekNumber) : (weekId ? parseInt(weekId) : 1);
   const targetUnit = unitId ? parseInt(unitId) : 1;
@@ -76,14 +88,28 @@ export const StudentWeekLearningPage: React.FC = () => {
     );
   }
 
-  const { week_number, title, description, materials = [], lab, practice_questions = [] } = data;
+  const {
+    week_number,
+    title,
+    description,
+    materials = [],
+    lab,
+    practice_questions = [],
+    quick_practice_questions = [],
+    flashcards = [],
+  } = data;
 
   const notesMaterials = materials.filter((m: any) => m.material_type === "notes");
   const videoMaterials = materials.filter((m: any) => m.material_type === "youtube" || m.material_type === "video" || m.url);
   const imageMaterials = materials.filter((m: any) => m.material_type === "image");
   const docMaterials = materials.filter((m: any) => ["pdf", "docx", "txt"].includes(m.material_type));
 
-  const hasAnyPublishedContent = materials.length > 0 || practice_questions.length > 0;
+  const hasAnyPublishedContent =
+    materials.length > 0 ||
+    practice_questions.length > 0 ||
+    quick_practice_questions.length > 0 ||
+    flashcards.length > 0;
+
 
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6 pb-28">
@@ -239,7 +265,13 @@ export const StudentWeekLearningPage: React.FC = () => {
 
             {videoMaterials.length > 0 && (
               <button
-                onClick={() => setActiveTab("videos")}
+                onClick={() => {
+                  setActiveTab("videos");
+                  setSearchParams((prev) => {
+                    prev.set("tab", "videos");
+                    return prev;
+                  });
+                }}
                 className={`pb-3 px-3 sm:px-4 border-b-2 flex items-center space-x-2 transition whitespace-nowrap ${
                   activeTab === "videos"
                     ? "border-brand-600 text-brand-700 font-bold"
@@ -251,9 +283,53 @@ export const StudentWeekLearningPage: React.FC = () => {
               </button>
             )}
 
-            {practice_questions.length > 0 && (
+            {/* Mind Map Tab immediately after Video Tutorials */}
+            <button
+              onClick={() => {
+                setActiveTab("mindmap");
+                setSearchParams((prev) => {
+                  prev.set("tab", "mindmap");
+                  return prev;
+                });
+              }}
+              className={`pb-3 px-3 sm:px-4 border-b-2 flex items-center space-x-2 transition whitespace-nowrap ${
+                activeTab === "mindmap"
+                  ? "border-brand-600 text-brand-700 font-bold"
+                  : "border-transparent text-slate-500 hover:text-slate-800"
+              }`}
+            >
+              <GitBranch className="w-4 h-4" />
+              <span>Mind Map</span>
+            </button>
+
+            {/* Flashcards Tab */}
+            <button
+              onClick={() => {
+                setActiveTab("flashcards");
+                setSearchParams((prev) => {
+                  prev.set("tab", "flashcards");
+                  return prev;
+                });
+              }}
+              className={`pb-3 px-3 sm:px-4 border-b-2 flex items-center space-x-2 transition whitespace-nowrap ${
+                activeTab === "flashcards"
+                  ? "border-brand-600 text-brand-700 font-bold"
+                  : "border-transparent text-slate-500 hover:text-slate-800"
+              }`}
+            >
+              <Layers className="w-4 h-4" />
+              <span>Flashcards ({flashcards?.length || 5})</span>
+            </button>
+
+            {(quick_practice_questions.length > 0 || practice_questions.length > 0) && (
               <button
-                onClick={() => setActiveTab("practice")}
+                onClick={() => {
+                  setActiveTab("practice");
+                  setSearchParams((prev) => {
+                    prev.set("tab", "practice");
+                    return prev;
+                  });
+                }}
                 className={`pb-3 px-3 sm:px-4 border-b-2 flex items-center space-x-2 transition whitespace-nowrap ${
                   activeTab === "practice"
                     ? "border-brand-600 text-brand-700 font-bold"
@@ -261,7 +337,7 @@ export const StudentWeekLearningPage: React.FC = () => {
                 }`}
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span>Practice Questions ({practice_questions.length})</span>
+                <span>Practice Questions ({quick_practice_questions.length || practice_questions.length})</span>
               </button>
             )}
           </div>
@@ -427,13 +503,52 @@ export const StudentWeekLearningPage: React.FC = () => {
               </div>
             )}
 
-            {/* Practice Questions Accordion */}
-            {(activeTab === "all" || activeTab === "practice") && practice_questions.length > 0 && (
+            {/* Mind Map Section (SDLC Infographic & Interactive Explorer) */}
+            {(activeTab === "all" || activeTab === "mindmap") && (
               <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <GitBranch className="w-4 h-4 text-brand-600" />
+                    <span>Software Development Life Cycle (SDLC) Mind Map & Methodology Explorer</span>
+                  </h3>
+                  {activeTab === "all" && (
+                    <button
+                      onClick={() => {
+                        setActiveTab("mindmap");
+                        setSearchParams((prev) => {
+                          prev.set("tab", "mindmap");
+                          return prev;
+                        });
+                      }}
+                      className="text-xs font-bold text-brand-700 hover:text-brand-800 flex items-center gap-1"
+                    >
+                      <span>Focus Mind Map View</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+                <SDLCMindMapViewer />
+              </div>
+            )}
+
+            {/* Quick Practice Questions & SDLC Flashcards */}
+            {(activeTab === "all" || activeTab === "flashcards" || activeTab === "practice") && (
+              <div className="space-y-4">
+                <SDLCFlashcardsAndPracticeSection
+                  questions={quick_practice_questions}
+                  flashcards={flashcards}
+                  activeView={activeTab === "flashcards" ? "flashcards" : (activeTab === "practice" ? "practice" : "both")}
+                />
+              </div>
+            )}
+
+            {/* Practice Questions Accordion (if legacy syllabus notes questions exist) */}
+            {(activeTab === "all" || activeTab === "practice") && practice_questions.length > 0 && (
+              <div className="space-y-4 pt-4 border-t border-slate-200">
                 <div className="flex justify-between items-center pb-2 border-b border-slate-200">
                   <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-brand-600" />
-                    <span>Sample Practice Questions</span>
+                    <span>Curriculum Practice Questions Bank</span>
                   </h3>
                   <span className="text-xs font-semibold text-slate-500">{practice_questions.length} Questions</span>
                 </div>

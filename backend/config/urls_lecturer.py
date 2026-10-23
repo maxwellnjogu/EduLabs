@@ -6,6 +6,10 @@ from learning.lecturer_views import (
     LecturerMaterialsView,
     LecturerMaterialDetailView,
     LecturerRevisionPackView,
+    LecturerPracticeQuestionsView,
+    LecturerPracticeQuestionDetailView,
+    LecturerPracticeQuestionReorderView,
+    LecturerGenerateLearningContentView,
 )
 from assessments.lecturer_views import (
     LecturerGenerateDemoContentView,
@@ -31,6 +35,7 @@ urlpatterns = [
     path("units/<int:unit_id>/revision-pack/", LecturerRevisionPackView.as_view(), name="lecturer-unit-revision-pack"),
     path("units/<int:unit_id>/final-exam-approvals/", LecturerFinalExamApprovalsView.as_view(), name="lecturer-final-exam-approvals"),
     path("units/<int:unit_id>/generate-exam-readiness/", LecturerGenerateExamReadinessView.as_view(), name="lecturer-unit-generate-exam-readiness"),
+    path("units/<int:unit_id>/generate-learning-content/", LecturerGenerateLearningContentView.as_view(), name="lecturer-unit-generate-learning-content"),
     path("units/<int:unit_id>/generate-demo-content/", LecturerGenerateDemoContentView.as_view(), name="lecturer-generate-demo-content"),
     path("assessments/<int:assessment_id>/generate-demo-content/", LecturerGenerateDemoContentView.as_view(), name="lecturer-assessment-generate-demo-content"),
     path("assessments/<int:assessment_id>/generate-grounded/", LecturerGenerateGroundedQuestionsView.as_view(), name="lecturer-assessment-generate-grounded"),
@@ -45,5 +50,9 @@ urlpatterns = [
     path("questions/<int:question_id>/", LecturerQuestionDetailView.as_view(), name="lecturer-question-detail"),
     path("questions/<int:question_id>/regenerate/", LecturerRegenerateQuestionView.as_view(), name="lecturer-question-regenerate"),
     path("final-exam-approvals/<int:eligibility_id>/approve/", LecturerApproveFinalExamView.as_view(), name="lecturer-approve-final-exam"),
+    path("practice-questions/", LecturerPracticeQuestionsView.as_view(), name="lecturer-practice-questions"),
+    path("practice-questions/<int:pk>/", LecturerPracticeQuestionDetailView.as_view(), name="lecturer-practice-question-detail"),
+    path("practice-questions/reorder/", LecturerPracticeQuestionReorderView.as_view(), name="lecturer-practice-questions-reorder"),
 ]
+
 

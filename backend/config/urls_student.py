@@ -7,6 +7,8 @@ from learning.student_views import (
     StudentWeekDetailView,
     StudentRevisionView,
     StudentAskTutorView,
+    StudentPracticeQuestionsView,
+    StudentCheckPracticeQuestionView,
 )
 from assessments.student_views import (
     StudentAssessmentDetailView,
@@ -32,4 +34,7 @@ urlpatterns = [
     path("attempts/<int:attempt_id>/", StudentAttemptDetailView.as_view(), name="student-attempt-detail"),
     path("leaderboard/", StudentLeaderboardView.as_view(), name="student-leaderboard"),
     path("ask-tutor/", StudentAskTutorView.as_view(), name="student-ask-tutor"),
+    path("practice-questions/", StudentPracticeQuestionsView.as_view(), name="student-practice-questions"),
+    path("practice-questions/<int:pk>/check/", StudentCheckPracticeQuestionView.as_view(), name="student-practice-question-check"),
 ]
+

@@ -201,25 +201,44 @@ PREPARED_SDLC_TRIVIA = [
 
 PREPARED_SDLC_FLASHCARDS = [
     {
-        "prompt": "What is the purpose of the planning phase?",
+        "id": 1,
+        "prompt": "What does SDLC stand for?",
+        "topic_tag": "SDLC Fundamentals",
+        "marks": 0.0,
+        "timer_seconds": 10,
+        "explanation": "Software Development Life Cycle.",
+    },
+    {
+        "id": 2,
+        "prompt": "What is the purpose of the Planning phase?",
         "topic_tag": "Planning",
         "marks": 0.0,
         "timer_seconds": 10,
-        "explanation": "Define project goals, scope, cost and timeline.",
+        "explanation": "Define project goals, scope, feasibility, costs, and timeline.",
     },
     {
-        "prompt": "What happens during the testing phase?",
-        "topic_tag": "Testing",
+        "id": 3,
+        "prompt": "What happens during Requirements Analysis?",
+        "topic_tag": "Requirements Analysis",
         "marks": 0.0,
         "timer_seconds": 10,
-        "explanation": "Software is checked for bugs and correct behavior.",
+        "explanation": "Gather and finalize requirements with users and stakeholders.",
     },
     {
-        "prompt": "What is the purpose of maintenance?",
-        "topic_tag": "Maintenance",
+        "id": 4,
+        "prompt": "What is the main characteristic of Waterfall?",
+        "topic_tag": "Waterfall Model",
         "marks": 0.0,
         "timer_seconds": 10,
-        "explanation": "Fix issues and update software after release.",
+        "explanation": "Phases are completed sequentially.",
+    },
+    {
+        "id": 5,
+        "prompt": "What is a Scrum sprint?",
+        "topic_tag": "Scrum Framework",
+        "marks": 0.0,
+        "timer_seconds": 10,
+        "explanation": "A timeboxed period for delivering a defined increment.",
     },
 ]
 
@@ -264,367 +283,550 @@ PREPARED_SDLC_MATCHING = {
     "explanation": "Planning defines goals; Analysis gathers user requirements; Design plans structure; Implementation writes code; Testing checks for defects; Maintenance improves released system.",
 }
 
-def get_prepared_sdlc_activities(selected_modes=None):
+PREPARED_SDLC_MULTI_SELECT = [
+    {
+        "prompt": "Which of the following are classified as Non-Functional Requirements (NFRs) for an enterprise web application? (Select all that apply)",
+        "topic_tag": "Requirements Engineering",
+        "marks": 2.0,
+        "timer_seconds": 25,
+        "explanation": "Security, performance response time, and availability are non-functional quality constraints. Student login and fine calculation are functional features.",
+        "scoring_method": "partial",
+        "options": [
+            {"text": "System must respond to search queries within 200 milliseconds under 1,000 concurrent users", "is_correct": True},
+            {"text": "All student passwords and session tokens must be encrypted using AES-256 and Argon2", "is_correct": True},
+            {"text": "The portal must calculate a 50-cent overdue fine when a textbook return is late", "is_correct": False},
+            {"text": "The production database must achieve 99.9% uptime during semester examination windows", "is_correct": True},
+            {"text": "Students can click 'Reserve Book' to hold a textbook for 48 hours", "is_correct": False},
+        ],
+    },
+    {
+        "prompt": "Which statements accurately describe the differences between Agile and Waterfall software methodologies? (Select all that apply)",
+        "topic_tag": "Development Methodologies",
+        "marks": 2.0,
+        "timer_seconds": 25,
+        "explanation": "Agile welcomes evolving requirements in iterative sprints, whereas Waterfall uses sequential phase sign-offs. Both require testing, but Agile tests continuously.",
+        "scoring_method": "partial",
+        "options": [
+            {"text": "Waterfall completes each phase sequentially before advancing to the next", "is_correct": True},
+            {"text": "Agile delivers working software increments in timeboxed sprints of 1 to 4 weeks", "is_correct": True},
+            {"text": "Waterfall does not require any testing or quality assurance activities", "is_correct": False},
+            {"text": "Agile teams actively incorporate customer feedback and changing priorities throughout development", "is_correct": True},
+        ],
+    },
+    {
+        "prompt": "Which of the following are core principles of the Agile Manifesto? (Select all that apply)",
+        "topic_tag": "Agile Principles",
+        "marks": 2.0,
+        "timer_seconds": 25,
+        "explanation": "The Agile Manifesto values individuals and interactions over processes and tools, working software over comprehensive documentation, customer collaboration over contract negotiation, and responding to change over following a plan.",
+        "scoring_method": "partial",
+        "options": [
+            {"text": "Individuals and interactions over processes and tools", "is_correct": True},
+            {"text": "Comprehensive documentation over working software", "is_correct": False},
+            {"text": "Customer collaboration over contract negotiation", "is_correct": True},
+            {"text": "Responding to change over following a rigid plan", "is_correct": True},
+        ],
+    },
+]
+
+PREPARED_SDLC_FILL_BLANKS = [
+    {
+        "prompt": "In the SDLC, the [blank] phase defines software blueprints, architecture, and database schemas, while the [blank] phase translates those designs into executable program code.",
+        "topic_tag": "SDLC Phases",
+        "marks": 2.0,
+        "timer_seconds": 25,
+        "blanks_count": 2,
+        "accepted_answers": [
+            ["design", "system design", "architectural design"],
+            ["implementation", "coding", "development", "construction"]
+        ],
+        "explanation": "The Design phase produces technical models and schemas, and the Implementation (or Coding) phase writes the actual source code.",
+    },
+    {
+        "prompt": "According to Barry Boehm's cost curve, finding and fixing a software defect during the [blank] phase costs up to 100 times more than discovering it during the [blank] phase.",
+        "topic_tag": "Software Quality Economics",
+        "marks": 2.0,
+        "timer_seconds": 25,
+        "blanks_count": 2,
+        "accepted_answers": [
+            ["production", "maintenance", "deployment", "post-release"],
+            ["requirements", "analysis", "requirement analysis", "planning"]
+        ],
+        "explanation": "Fixing defects in Production requires emergency hotfixes, data repair, and redeployment, costing exponentially more than catching them during Requirements Analysis.",
+    },
+    {
+        "prompt": "In the standard deployment pipeline, unstable new code is written in the [blank] environment, automated tests and QA occur in the [blank] environment, and live end-users access the [blank] environment.",
+        "topic_tag": "Deployment Environments",
+        "marks": 3.0,
+        "timer_seconds": 30,
+        "blanks_count": 3,
+        "accepted_answers": [
+            ["development", "dev"],
+            ["staging", "qa", "quality assurance", "test"],
+            ["production", "prod", "live"]
+        ],
+        "explanation": "The three standard environments are Development (coding sandbox), Staging/QA (pre-release testing replica), and Production (live hardened user tier).",
+    },
+]
+
+PREPARED_SDLC_CASE_STUDY = {
+    "case_title": "Enterprise Cloud Migration & Security Refactoring for FinTech Core",
+    "case_description": (
+        "Apex Digital Bank is modernizing its 12-year-old monolithic loan origination system to a microservices architecture hosted on AWS. "
+        "During the preliminary sprint, the team discovered that legacy code hardcoded database connection credentials directly in source files, "
+        "relied on synchronous HTTP calls between services that caused 8-second checkout latency during peak loan application periods, and "
+        "had zero automated unit test coverage for its credit scoring engine. Furthermore, state banking regulators require complete audit trails "
+        "with immutable event logging and strict adherence to role-based access control (RBAC)."
+    ),
+    "tasks": [
+        {
+            "prompt": "Task 1: Propose an architectural pattern and deployment pipeline to resolve the latency bottlenecks and hardcoded credential vulnerabilities.",
+            "topic_tag": "System Architecture & Security",
+            "marks": 4.0,
+            "timer_seconds": 120,
+            "marking_rubric": (
+                "Full marks (4.0): Recommends an event-driven architecture or asynchronous message queue (e.g. RabbitMQ/Kafka) to decouple synchronous calls and reduce latency. "
+                "Specifies a secrets manager (e.g. AWS Secrets Manager or HashiCorp Vault) and environment variables to eliminate hardcoded credentials. "
+                "Partial (2.0): Mentions caching or secrets manager but lacks concrete architectural flow."
+            ),
+            "explanation": "Asynchronous event queues eliminate blocking HTTP latency, while cloud secrets managers with RBAC prevent credential leakage into git history.",
+        },
+        {
+            "prompt": "Task 2: Formulate a testing and compliance verification strategy to satisfy both regulatory audit requirements and eliminate defects in the credit scoring engine.",
+            "topic_tag": "Testing & Regulatory Compliance",
+            "marks": 4.0,
+            "timer_seconds": 120,
+            "marking_rubric": (
+                "Full marks (4.0): Outlines a test pyramid strategy with extensive unit testing (mocking loan inputs) achieving >90% branch coverage on the credit engine. "
+                "Details immutable append-only audit logging (e.g. AWS CloudTrail or database event sourcing) and strict separation of Dev, Staging, and Production environments. "
+                "Partial (2.0): Mentions unit tests without addressing regulatory audit trail requirements."
+            ),
+            "explanation": "Automated unit tests with branch coverage verify mathematical precision in loan scoring, while append-only audit trails satisfy banking regulatory scrutiny.",
+        },
+    ],
+}
+
+PREPARED_SDLC_SCENARIOS = [
+    {
+        "prompt": "A university wants a system that allows students to borrow books and check return dates. Before coding starts, the development team meets the librarian to understand the requirements.\n\nWhich SDLC phase is the team performing, and why?",
+        "topic_tag": "What Would You Do? Scenario",
+        "marks": 2.0,
+        "timer_seconds": 25,
+        "marking_rubric": "Expected answer: Analysis or requirements gathering. The team is identifying user needs before development begins.",
+        "explanation": "Analysis or requirements gathering. The team is identifying user needs before development begins.",
+    },
+    {
+        "prompt": "A hospital management portal experiences high latency during morning shift changeovers when 300 nurses simultaneously log in to update patient vitals. The team is deciding whether to add more servers (horizontal scaling) or rewrite the authentication module to use asynchronous stateless JWT tokens.\n\nWhich SDLC phase should investigate this performance issue, and what engineering evaluation should be conducted?",
+        "topic_tag": "What Would You Do? Scenario",
+        "marks": 3.0,
+        "timer_seconds": 35,
+        "marking_rubric": "Expected answer: Maintenance (perfective/adaptive) or Design phase. The team must conduct performance profiling and load testing to determine if the bottleneck is database session locking or CPU contention before committing architectural changes.",
+        "explanation": "During Maintenance or Architectural Redesign, performance load profiling identifies whether session storage or network I/O is the root bottleneck.",
+    },
+]
+
+def get_prepared_sdlc_activities(selected_modes=None, mode_configs=None):
     """
     Returns the prepared SDLC activities matching the lecturer's selected modes.
-    Modes available:
-    - 'Matching Exercise' / 'matching'
-    - 'Drag & Drop' / 'drag_drop'
-    - 'Flashcards' / 'flashcard'
-    - 'What Would You Do? Scenario' / 'scenario' / 'written'
-    - 'Trivia Exercise' / 'trivia' / 'mcq'
-    - 'Group Work' / 'group_work'
+    Organized into:
+    Knowledge Checks:
+    - 'trivia' (Single-choice MCQ)
+    - 'multi_select' (Multiple-Select Questions)
+    - 'fill_blanks' (Fill in the Blanks)
+    - 'flashcards' (Flashcards - front & back, ungraded by default)
+    Application and Problem-Solving:
+    - 'matching' (Matching Exercise pairs)
+    - 'drag_drop' (Drag & Drop phase ordering)
+    - 'scenario' (What Would You Do? Scenario)
+    - 'case_study' (Case Study Analysis)
     """
     if not selected_modes:
         selected_modes = [
-            "Matching Exercise",
-            "Drag & Drop",
-            "Flashcards",
-            "What Would You Do? Scenario",
-            "Trivia Exercise",
+            "trivia",
+            "multi_select",
+            "fill_blanks",
+            "flashcards",
+            "matching",
+            "drag_drop",
+            "scenario",
+            "case_study",
         ]
 
     normalized = set()
     for m in selected_modes:
         low = str(m).strip().lower()
-        if "trivi" in low or "mcq" in low:
+        if "trivi" in low or low == "mcq":
             normalized.add("trivia")
+        elif "multi" in low or "select" in low:
+            normalized.add("multi_select")
+        elif "blank" in low or "fill" in low:
+            normalized.add("fill_blanks")
         elif "flash" in low:
             normalized.add("flashcards")
-        elif "scenario" in low or "what would" in low or "written" in low:
+        elif "scenario" in low or "what would" in low:
             normalized.add("scenario")
+        elif "case" in low or "study" in low:
+            normalized.add("case_study")
         elif "drag" in low or "drop" in low or "order" in low:
             normalized.add("drag_drop")
         elif "match" in low:
             normalized.add("matching")
-        elif "group" in low:
-            normalized.add("group_work")
 
     return {
-        "mcqs": PREPARED_SDLC_TRIVIA if "trivia" in normalized else [],
+        "trivia": PREPARED_SDLC_TRIVIA if "trivia" in normalized else [],
+        "multi_select": PREPARED_SDLC_MULTI_SELECT if "multi_select" in normalized else [],
+        "fill_blanks": PREPARED_SDLC_FILL_BLANKS if "fill_blanks" in normalized else [],
         "flashcards": PREPARED_SDLC_FLASHCARDS if "flashcards" in normalized else [],
-        "scenario": PREPARED_SDLC_SCENARIO if "scenario" in normalized else None,
-        "drag_drop": PREPARED_SDLC_DRAG_DROP if "drag_drop" in normalized else None,
         "matching": PREPARED_SDLC_MATCHING if "matching" in normalized else None,
-        "group_work_selected": "group_work" in normalized,
+        "drag_drop": PREPARED_SDLC_DRAG_DROP if "drag_drop" in normalized else None,
+        "scenarios": PREPARED_SDLC_SCENARIOS if "scenario" in normalized else [],
+        "case_study": PREPARED_SDLC_CASE_STUDY if "case_study" in normalized else None,
     }
 
-# 20 MCQs for SDLC Lab 1 (1.0 mark each)
-WEEK1_LAB_MCQS = [
-    {
-        "prompt": "Which phase of the Software Development Life Cycle focuses on gathering stakeholder needs and defining functional specifications?",
-        "topic_tag": "Requirement Analysis",
-        "marks": 1.0,
-        "timer_seconds": 15,
-        "explanation": "Requirement Analysis is the initial phase where business analysts and engineers gather expectations from clients, users, and SMEs.",
-        "options": [
-            {"text": "Requirement Analysis", "is_correct": True},
-            {"text": "Implementation", "is_correct": False},
-            {"text": "Quality Assurance", "is_correct": False},
-            {"text": "Evolution", "is_correct": False},
-        ],
-    },
-    {
-        "prompt": "In the standard deployment pipeline, which environment is reserved exclusively for live end-users to interact with the finished software?",
-        "topic_tag": "Deployment Environments",
-        "marks": 1.0,
-        "timer_seconds": 15,
-        "explanation": "The Production Environment is the live deployment where real users access real data and operational services.",
-        "options": [
-            {"text": "Development Environment", "is_correct": False},
-            {"text": "Quality Assurance (QA) Environment", "is_correct": False},
-            {"text": "Staging Sandbox", "is_correct": False},
-            {"text": "Production Environment", "is_correct": True},
-        ],
-    },
-    {
-        "prompt": "What primary characteristic distinguishes a Predictive (Waterfall) model from an Adaptive (Agile) model?",
-        "topic_tag": "Methodologies",
-        "marks": 1.0,
-        "timer_seconds": 15,
-        "explanation": "Waterfall is sequential and requires each phase to be completed before moving forward, whereas Agile is iterative and embraces evolving requirements.",
-        "options": [
-            {"text": "Waterfall completes phases sequentially, while Agile develops iteratively in increments", "is_correct": True},
-            {"text": "Waterfall does not require testing, while Agile requires continuous testing", "is_correct": False},
-            {"text": "Waterfall uses daily scrums, while Agile uses rigid milestone sign-offs", "is_correct": False},
-            {"text": "Waterfall is only for mobile applications, while Agile is for web services", "is_correct": False},
-        ],
-    },
-    {
-        "prompt": "Which testing tier focuses specifically on verifying individual functions, methods, or procedures in isolation?",
-        "topic_tag": "Software Testing",
-        "marks": 1.0,
-        "timer_seconds": 15,
-        "explanation": "Unit testing verifies small, isolated building blocks of code to catch logic flaws before components are joined.",
-        "options": [
-            {"text": "Unit Testing", "is_correct": True},
-            {"text": "Integration Testing", "is_correct": False},
-            {"text": "System Testing", "is_correct": False},
-            {"text": "User Acceptance Testing (UAT)", "is_correct": False},
-        ],
-    },
-    {
-        "prompt": "In the Scrum framework, what is the 'Product Backlog'?",
-        "topic_tag": "Scrum Framework",
-        "marks": 1.0,
-        "timer_seconds": 15,
-        "explanation": "The Product Backlog is a prioritized list of all desired functional features, enhancements, and bug fixes for the product.",
-        "options": [
-            {"text": "A list of software bugs identified during production release", "is_correct": False},
-            {"text": "A prioritized master list of all features and requirements for the product", "is_correct": True},
-            {"text": "A timesheet documenting daily team hours spent on coding", "is_correct": False},
-            {"text": "The archived code repository from completed development cycles", "is_correct": False},
-        ],
-    },
-    {
-        "prompt": "What is the typical time-boxed duration of a Daily Scrum meeting?",
-        "topic_tag": "Scrum Framework",
-        "marks": 1.0,
-        "timer_seconds": 15,
-        "explanation": "The Daily Scrum is a brief 15-minute standup meeting designed to synchronize the development team and surface blockers.",
-        "options": [
-            {"text": "15 minutes", "is_correct": True},
-            {"text": "60 minutes", "is_correct": False},
-            {"text": "45 minutes", "is_correct": False},
-            {"text": "90 minutes", "is_correct": False},
-        ],
-    },
-    {
-        "prompt": "What is the primary role of front-end coding in software implementation?",
-        "topic_tag": "Implementation",
-        "marks": 1.0,
-        "timer_seconds": 15,
-        "explanation": "Front-end coding focuses on client-side presentation, interactive user interface controls, and user experience.",
-        "options": [
-            {"text": "Building user-facing presentation, UI controls, and visual interfaces", "is_correct": True},
-            {"text": "Managing database tables, indexes, and SQL migrations", "is_correct": False},
-            {"text": "Configuring bare-metal network switches and firewalls", "is_correct": False},
-            {"text": "Performing physical hardware burn-in diagnostics", "is_correct": False},
-        ],
-    },
-    {
-        "prompt": "What phase immediately follows Implementation in the supplied 5-phase SDLC diagram (Requirement Analysis -> Design -> Implementation -> Testing -> Evolution)?",
-        "topic_tag": "SDLC Phases",
-        "marks": 1.0,
-        "timer_seconds": 15,
-        "explanation": "According to the architectural blueprint, Testing immediately follows Implementation to validate code before Evolution.",
-        "options": [
-            {"text": "Testing", "is_correct": True},
-            {"text": "Requirement Analysis", "is_correct": False},
-            {"text": "Evolution", "is_correct": False},
-            {"text": "Design", "is_correct": False},
-        ],
-    },
-    {
-        "prompt": "What does UAT stand for in software quality assurance?",
-        "topic_tag": "Software Testing",
-        "marks": 1.0,
-        "timer_seconds": 15,
-        "explanation": "UAT stands for User Acceptance Testing, where actual users validate that the system fulfills their operational needs.",
-        "options": [
-            {"text": "User Acceptance Testing", "is_correct": True},
-            {"text": "Unified Automated Testing", "is_correct": False},
-            {"text": "Universal Application Tuning", "is_correct": False},
-            {"text": "Unit Architecture Testing", "is_correct": False},
-        ],
-    },
-    {
-        "prompt": "In software evolution and maintenance, what is the term used for modifying an application to keep it operational in an updated environment (e.g. new OS or database)?",
-        "topic_tag": "Evolution",
-        "marks": 1.0,
-        "timer_seconds": 15,
-        "explanation": "Adaptive maintenance modifies the software to interface properly with changing external environments, platforms, or operating systems.",
-        "options": [
-            {"text": "Adaptive Maintenance", "is_correct": True},
-            {"text": "Corrective Maintenance", "is_correct": False},
-            {"text": "Reflective Maintenance", "is_correct": False},
-            {"text": "Emergency Patching", "is_correct": False},
-        ],
-    },
-    {
-        "prompt": "During which SDLC phase are Entity Relationship Diagrams (ERDs) and architectural blueprints typically authored?",
-        "topic_tag": "Design",
-        "marks": 1.0,
-        "timer_seconds": 15,
-        "explanation": "ERDs and architectural blueprints are created during the Design phase to guide implementation.",
-        "options": [
-            {"text": "Design", "is_correct": True},
-            {"text": "Testing", "is_correct": False},
-            {"text": "Requirement Analysis", "is_correct": False},
-            {"text": "Evolution", "is_correct": False},
-        ],
-    },
-    {
-        "prompt": "What is the primary risk of skipping the Quality Assurance (QA) staging environment before production?",
-        "topic_tag": "Deployment Environments",
-        "marks": 1.0,
-        "timer_seconds": 15,
-        "explanation": "Skipping QA exposes live users to untested defects, data corruption, and catastrophic downtime.",
-        "options": [
-            {"text": "Releasing unverified defects and security vulnerabilities directly to live users", "is_correct": True},
-            {"text": "Increasing developer hourly billing rates", "is_correct": False},
-            {"text": "Preventing Git branches from merging", "is_correct": False},
-            {"text": "Making unit tests run slower", "is_correct": False},
-        ],
-    },
-    {
-        "prompt": "Which Scrum role is responsible for maximizing the business value of the product and prioritizing user stories?",
-        "topic_tag": "Scrum Framework",
-        "marks": 1.0,
-        "timer_seconds": 15,
-        "explanation": "The Product Owner owns the vision, manages the backlog, and prioritizes stories based on business value.",
-        "options": [
-            {"text": "Product Owner", "is_correct": True},
-            {"text": "Scrum Master", "is_correct": False},
-            {"text": "Lead Architect", "is_correct": False},
-            {"text": "Database Administrator", "is_correct": False},
-        ],
-    },
-    {
-        "prompt": "Which type of software maintenance repairs bugs and defects discovered after production release?",
-        "topic_tag": "Evolution",
-        "marks": 1.0,
-        "timer_seconds": 15,
-        "explanation": "Corrective maintenance is reactive work that fixes faults, crashes, or incorrect logic in production.",
-        "options": [
-            {"text": "Corrective Maintenance", "is_correct": True},
-            {"text": "Perfective Maintenance", "is_correct": False},
-            {"text": "Preventive Maintenance", "is_correct": False},
-            {"text": "Adaptive Maintenance", "is_correct": False},
-        ],
-    },
-    {
-        "prompt": "What is the purpose of a Sprint Retrospective meeting in Scrum?",
-        "topic_tag": "Scrum Framework",
-        "marks": 1.0,
-        "timer_seconds": 15,
-        "explanation": "The retrospective allows the team to inspect its processes, celebrate wins, and agree on continuous process improvements.",
-        "options": [
-            {"text": "To inspect team performance and identify process improvements for the next sprint", "is_correct": True},
-            {"text": "To demonstrate working software to stakeholders and clients", "is_correct": False},
-            {"text": "To review individual timesheets and calculate bonuses", "is_correct": False},
-            {"text": "To deploy release candidates to the production cluster", "is_correct": False},
-        ],
-    },
-    {
-        "prompt": "What software testing tier verifies that separate modules (such as the API gateway and database service) communicate properly?",
-        "topic_tag": "Software Testing",
-        "marks": 1.0,
-        "timer_seconds": 15,
-        "explanation": "Integration testing verifies interface communication and data exchange between interrelated modules.",
-        "options": [
-            {"text": "Integration Testing", "is_correct": True},
-            {"text": "Unit Testing", "is_correct": False},
-            {"text": "Alpha Testing", "is_correct": False},
-            {"text": "Static Analysis", "is_correct": False},
-        ],
-    },
-    {
-        "prompt": "In Agile software engineering, what is an 'Epic'?",
-        "topic_tag": "Methodologies",
-        "marks": 1.0,
-        "timer_seconds": 15,
-        "explanation": "An Epic is a large body of work or feature that can be broken down into smaller, actionable user stories.",
-        "options": [
-            {"text": "A large user story that spans multiple sprints and contains several smaller stories", "is_correct": True},
-            {"text": "A critical severity defect causing immediate application outage", "is_correct": False},
-            {"text": "An external audit conducted by government regulators", "is_correct": False},
-            {"text": "A code review meeting lasting more than four hours", "is_correct": False},
-        ],
-    },
-    {
-        "prompt": "What is meant by 'Defensive Programming' during the Implementation phase?",
-        "topic_tag": "Implementation",
-        "marks": 1.0,
-        "timer_seconds": 15,
-        "explanation": "Defensive programming involves anticipating edge cases, validating inputs, and handling exceptions to prevent crashes.",
-        "options": [
-            {"text": "Writing code that validates inputs, anticipates edge cases, and fails safely", "is_correct": True},
-            {"text": "Encrypting source code on developer laptops with BitLocker", "is_correct": False},
-            {"text": "Only allowing senior engineers to write unit tests", "is_correct": False},
-            {"text": "Deploying web application firewalls around the staging cluster", "is_correct": False},
-        ],
-    },
-    {
-        "prompt": "Which phase of the SDLC establishes non-functional requirements such as latency, security, and scalability benchmarks?",
-        "topic_tag": "Requirement Analysis",
-        "marks": 1.0,
-        "timer_seconds": 15,
-        "explanation": "Requirement Analysis defines both functional capabilities and non-functional quality constraints.",
-        "options": [
-            {"text": "Requirement Analysis", "is_correct": True},
-            {"text": "Coding", "is_correct": False},
-            {"text": "Unit Testing", "is_correct": False},
-            {"text": "Maintenance", "is_correct": False},
-        ],
-    },
-    {
-        "prompt": "What artifact defines the sprint goal and list of tasks committed to by developers for a 2-week cycle?",
-        "topic_tag": "Scrum Framework",
-        "marks": 1.0,
-        "timer_seconds": 15,
-        "explanation": "The Sprint Backlog contains the selected user stories and technical tasks committed for the active sprint.",
-        "options": [
-            {"text": "Sprint Backlog", "is_correct": True},
-            {"text": "Product Vision Statement", "is_correct": False},
-            {"text": "Service Level Agreement", "is_correct": False},
-            {"text": "Database Schema Diagram", "is_correct": False},
-        ],
-    },
-]
+# 30 Beginner-Friendly SDLC Questions (1.0 mark each = 30 marks total)
+SDLC_30_EASY_QUESTIONS = [   {   'difficulty': 'Easy',
+        'explanation': 'SDLC is the process followed to develop and maintain software.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'Software Development Life Cycle'},
+                       {'is_correct': False, 'text': 'System Design Learning Course'},
+                       {'is_correct': False, 'text': 'Software Data Link Connection'},
+                       {'is_correct': False, 'text': 'System Development Logic Control'}],
+        'prompt': 'What does SDLC stand for?',
+        'timer_seconds': 15,
+        'topic_tag': 'SDLC Basics'},
+    {   'difficulty': 'Easy',
+        'explanation': 'SDLC provides an organized approach to building software.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'To develop software in an organized way'},
+                       {'is_correct': False, 'text': 'To play computer games'},
+                       {'is_correct': False, 'text': 'To browse websites'},
+                       {'is_correct': False, 'text': 'To repair computer hardware only'}],
+        'prompt': 'What is the main purpose of SDLC?',
+        'timer_seconds': 15,
+        'topic_tag': 'SDLC Basics'},
+    {   'difficulty': 'Easy',
+        'explanation': 'Software teams use SDLC to plan, build, test, and maintain applications.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'Software development teams'},
+                       {'is_correct': False, 'text': 'Only musicians'},
+                       {'is_correct': False, 'text': 'Only drivers'},
+                       {'is_correct': False, 'text': 'Only photographers'}],
+        'prompt': 'Who uses the SDLC process?',
+        'timer_seconds': 15,
+        'topic_tag': 'SDLC Basics'},
+    {   'difficulty': 'Easy',
+        'explanation': 'A mobile banking app is software that performs tasks for users.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'A mobile banking app'},
+                       {'is_correct': False, 'text': 'A wooden desk'},
+                       {'is_correct': False, 'text': 'A notebook'},
+                       {'is_correct': False, 'text': 'A chair'}],
+        'prompt': 'Which of these is a software application?',
+        'timer_seconds': 15,
+        'topic_tag': 'SDLC Basics'},
+    {   'difficulty': 'Easy',
+        'explanation': "Planning helps the team understand the project's goals and requirements.",
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'It helps define goals and organize the work'},
+                       {'is_correct': False, 'text': 'It removes the need for testing'},
+                       {'is_correct': False, 'text': 'It guarantees that no bugs will exist'},
+                       {'is_correct': False, 'text': 'It replaces the users'}],
+        'prompt': 'Why is planning important in software development?',
+        'timer_seconds': 15,
+        'topic_tag': 'SDLC Basics'},
+    {   'difficulty': 'Easy',
+        'explanation': "Planning establishes the project's direction and resources.",
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'Project goals, cost, and timeline are considered'},
+                       {'is_correct': False, 'text': 'The finished application is retired'},
+                       {'is_correct': False, 'text': 'All bugs are automatically removed'},
+                       {'is_correct': False, 'text': 'Users stop giving feedback'}],
+        'prompt': 'What happens during the planning phase?',
+        'timer_seconds': 15,
+        'topic_tag': 'Planning & Feasibility'},
+    {   'difficulty': 'Easy',
+        'explanation': 'A feasibility study checks whether a project can reasonably be completed.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'Checking whether a project is practical'},
+                       {'is_correct': False, 'text': 'Choosing a wallpaper'},
+                       {'is_correct': False, 'text': 'Deleting the source code'},
+                       {'is_correct': False, 'text': 'Printing the user manual'}],
+        'prompt': 'What does feasibility mean?',
+        'timer_seconds': 15,
+        'topic_tag': 'Planning & Feasibility'},
+    {   'difficulty': 'Easy',
+        'explanation': 'Users and stakeholders help the team understand the required features.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'Users and stakeholders'},
+                       {'is_correct': False, 'text': 'Only the printer'},
+                       {'is_correct': False, 'text': 'Only the computer monitor'},
+                       {'is_correct': False, 'text': 'Nobody'}],
+        'prompt': 'Who helps explain what software should do?',
+        'timer_seconds': 15,
+        'topic_tag': 'Requirements Analysis'},
+    {   'difficulty': 'Easy',
+        'explanation': 'Requirements describe the functions and qualities the system needs.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'What the system must do or support'},
+                       {'is_correct': False, 'text': 'The color of the office walls'},
+                       {'is_correct': False, 'text': "The developer's lunch order"},
+                       {'is_correct': False, 'text': "The computer's screen size only"}],
+        'prompt': 'What are software requirements?',
+        'timer_seconds': 15,
+        'topic_tag': 'Requirements Analysis'},
+    {   'difficulty': 'Easy',
+        'explanation': 'Requirements analysis identifies and clarifies user and system needs.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'Finding out what users need'},
+                       {'is_correct': False, 'text': 'Advertising a finished product only'},
+                       {'is_correct': False, 'text': 'Replacing every computer'},
+                       {'is_correct': False, 'text': 'Closing the project before starting'}],
+        'prompt': 'Which activity belongs to requirements analysis?',
+        'timer_seconds': 15,
+        'topic_tag': 'Requirements Analysis'},
+    {   'difficulty': 'Easy',
+        'explanation': 'Design describes how the software should be organized and built.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'The team plans how the software will be structured'},
+                       {'is_correct': False, 'text': 'The software is always deleted'},
+                       {'is_correct': False, 'text': 'Users are prevented from giving requirements'},
+                       {'is_correct': False, 'text': 'The project skips development'}],
+        'prompt': 'What happens during the design phase?',
+        'timer_seconds': 15,
+        'topic_tag': 'System Design'},
+    {   'difficulty': 'Easy',
+        'explanation': 'Screen layouts and user flows are part of application design.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'Planning the screens of a student portal'},
+                       {'is_correct': False, 'text': 'Buying classroom chairs'},
+                       {'is_correct': False, 'text': 'Cleaning a whiteboard'},
+                       {'is_correct': False, 'text': 'Printing examination papers'}],
+        'prompt': 'Which is an example of software design?',
+        'timer_seconds': 15,
+        'topic_tag': 'System Design'},
+    {   'difficulty': 'Easy',
+        'explanation': 'Implementation turns the design into working software.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'Developers write the program code'},
+                       {'is_correct': False, 'text': 'Users select their examination seats'},
+                       {'is_correct': False, 'text': 'The software is permanently abandoned'},
+                       {'is_correct': False, 'text': 'The project avoids programming'}],
+        'prompt': 'What happens during implementation?',
+        'timer_seconds': 15,
+        'topic_tag': 'Implementation & Coding'},
+    {   'difficulty': 'Easy',
+        'explanation': 'Python is a programming language used to develop software.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'Python'},
+                       {'is_correct': False, 'text': 'A measuring tape'},
+                       {'is_correct': False, 'text': 'A stapler'},
+                       {'is_correct': False, 'text': 'A desk lamp'}],
+        'prompt': 'Which language can be used to write software?',
+        'timer_seconds': 15,
+        'topic_tag': 'Implementation & Coding'},
+    {   'difficulty': 'Easy',
+        'explanation': 'Source code contains the instructions developers write for a program.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'Instructions written in a programming language'},
+                       {'is_correct': False, 'text': "A computer's power cable"},
+                       {'is_correct': False, 'text': 'A printed timetable'},
+                       {'is_correct': False, 'text': 'A network socket only'}],
+        'prompt': 'What is source code?',
+        'timer_seconds': 15,
+        'topic_tag': 'Implementation & Coding'},
+    {   'difficulty': 'Easy',
+        'explanation': 'Testing checks software behavior and helps identify defects.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'To find defects and check that it works correctly'},
+                       {'is_correct': False, 'text': 'To make the computer heavier'},
+                       {'is_correct': False, 'text': 'To remove all user requirements'},
+                       {'is_correct': False, 'text': 'To avoid checking the software'}],
+        'prompt': 'Why is software tested?',
+        'timer_seconds': 15,
+        'topic_tag': 'Software Testing'},
+    {   'difficulty': 'Easy',
+        'explanation': 'A bug is a defect that can cause incorrect or unexpected behavior.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'An error or defect in a program'},
+                       {'is_correct': False, 'text': 'A type of keyboard'},
+                       {'is_correct': False, 'text': 'A computer desk'},
+                       {'is_correct': False, 'text': 'A software development phase'}],
+        'prompt': 'What is a software bug?',
+        'timer_seconds': 15,
+        'topic_tag': 'Software Testing'},
+    {   'difficulty': 'Easy',
+        'explanation': 'Developers and testers can both check software for defects.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'Developers and testers'},
+                       {'is_correct': False, 'text': 'Only the project sponsor'},
+                       {'is_correct': False, 'text': 'Only the receptionist'},
+                       {'is_correct': False, 'text': 'Nobody'}],
+        'prompt': 'Who can test a software application?',
+        'timer_seconds': 15,
+        'topic_tag': 'Software Testing'},
+    {   'difficulty': 'Easy',
+        'explanation': 'Deployment makes a software system available in its intended environment.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'Making software available for use'},
+                       {'is_correct': False, 'text': 'Writing the project proposal only'},
+                       {'is_correct': False, 'text': 'Removing every feature'},
+                       {'is_correct': False, 'text': 'Stopping all testing permanently'}],
+        'prompt': 'What does deployment mean?',
+        'timer_seconds': 15,
+        'topic_tag': 'Deployment'},
+    {   'difficulty': 'Easy',
+        'explanation': 'Release checks help confirm that the software is ready for use.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'Appropriate testing and release checks'},
+                       {'is_correct': False, 'text': 'All requirements should be deleted'},
+                       {'is_correct': False, 'text': 'The application should never be checked'},
+                       {'is_correct': False, 'text': 'The source code should be hidden from the development team'}],
+        'prompt': 'What should happen before software is released?',
+        'timer_seconds': 15,
+        'topic_tag': 'Deployment'},
+    {   'difficulty': 'Easy',
+        'explanation': 'Maintenance keeps software useful and working after release.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'Fixing problems and updating software after release'},
+                       {'is_correct': False, 'text': 'Designing a classroom'},
+                       {'is_correct': False, 'text': 'Writing an unrelated poem'},
+                       {'is_correct': False, 'text': 'Removing every software feature'}],
+        'prompt': 'What is software maintenance?',
+        'timer_seconds': 15,
+        'topic_tag': 'Maintenance'},
+    {   'difficulty': 'Easy',
+        'explanation': 'Updates can fix defects, improve functionality, and address security issues.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'To fix a bug or improve a feature'},
+                       {'is_correct': False, 'text': 'To make it stop working'},
+                       {'is_correct': False, 'text': 'To delete all user feedback'},
+                       {'is_correct': False, 'text': 'To avoid security fixes'}],
+        'prompt': 'Which is a common reason to update software?',
+        'timer_seconds': 15,
+        'topic_tag': 'Maintenance'},
+    {   'difficulty': 'Easy',
+        'explanation': 'Waterfall organizes development into sequential phases.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'Waterfall'},
+                       {'is_correct': False, 'text': 'Scrum'},
+                       {'is_correct': False, 'text': 'Random guessing'},
+                       {'is_correct': False, 'text': 'Unplanned coding'}],
+        'prompt': 'Which model follows a sequence of phases?',
+        'timer_seconds': 15,
+        'topic_tag': 'Waterfall Model'},
+    {   'difficulty': 'Easy',
+        'explanation': 'Waterfall generally progresses through phases in sequence.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'The project proceeds to the next phase'},
+                       {'is_correct': False, 'text': 'The whole project must be deleted'},
+                       {'is_correct': False, 'text': 'Testing becomes forbidden'},
+                       {'is_correct': False, 'text': 'Requirements are always ignored'}],
+        'prompt': 'In Waterfall, what generally happens after a phase is completed?',
+        'timer_seconds': 15,
+        'topic_tag': 'Waterfall Model'},
+    {   'difficulty': 'Easy',
+        'explanation': 'Agile emphasizes iterative work, collaboration, and responding to change.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'Agile'},
+                       {'is_correct': False, 'text': 'Waterfall only'},
+                       {'is_correct': False, 'text': 'Manual filing'},
+                       {'is_correct': False, 'text': 'Hardware assembly'}],
+        'prompt': 'Which approach emphasizes iterative development and adapting to change?',
+        'timer_seconds': 15,
+        'topic_tag': 'Agile Development'},
+    {   'difficulty': 'Easy',
+        'explanation': 'A sprint is a defined period during which a Scrum team works toward a goal.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'A timeboxed period of development work'},
+                       {'is_correct': False, 'text': 'A computer brand'},
+                       {'is_correct': False, 'text': 'A type of database table'},
+                       {'is_correct': False, 'text': 'A software error'}],
+        'prompt': 'What is a Scrum sprint?',
+        'timer_seconds': 15,
+        'topic_tag': 'Scrum Framework'},
+    {   'difficulty': 'Easy',
+        'explanation': 'The daily Scrum helps the team inspect progress and plan its work.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'To coordinate work and discuss progress'},
+                       {'is_correct': False, 'text': 'To replace all software testing'},
+                       {'is_correct': False, 'text': 'To permanently close the project'},
+                       {'is_correct': False, 'text': 'To write the entire application in one meeting'}],
+        'prompt': 'What is the purpose of a daily Scrum?',
+        'timer_seconds': 15,
+        'topic_tag': 'Scrum Framework'},
+    {   'difficulty': 'Easy',
+        'explanation': 'The product backlog contains work that may be needed to improve the product.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'An ordered list of work needed for the product'},
+                       {'is_correct': False, 'text': 'A list of computer passwords'},
+                       {'is_correct': False, 'text': 'A collection of office furniture'},
+                       {'is_correct': False, 'text': 'A list of completed examinations only'}],
+        'prompt': 'What is a product backlog?',
+        'timer_seconds': 15,
+        'topic_tag': 'Scrum Framework'},
+    {   'difficulty': 'Easy',
+        'explanation': 'Feedback helps teams adjust their work to meet user needs.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'To improve the product and respond to changing needs'},
+                       {'is_correct': False, 'text': 'To prevent users from expressing concerns'},
+                       {'is_correct': False, 'text': 'To avoid making improvements'},
+                       {'is_correct': False, 'text': 'To remove the need for planning'}],
+        'prompt': 'Why do Agile teams seek feedback regularly?',
+        'timer_seconds': 15,
+        'topic_tag': 'Agile Development'},
+    {   'difficulty': 'Easy',
+        'explanation': 'A development model helps organize the activities involved in building software.',
+        'marks': 1.0,
+        'options': [   {'is_correct': True, 'text': 'It provides an approach for organizing development work'},
+                       {'is_correct': False, 'text': 'It guarantees that software never has bugs'},
+                       {'is_correct': False, 'text': 'It replaces every developer'},
+                       {'is_correct': False, 'text': 'It removes the need to understand users'}],
+        'prompt': 'Which statement best describes the purpose of a software development model?',
+        'timer_seconds': 15,
+        'topic_tag': 'Development Models'}]
 
-# 5 Flashcards for SDLC Lab 1 (1.0 mark each)
+WEEK1_LAB_MCQS = SDLC_30_EASY_QUESTIONS
+# 5 Flashcards for SDLC Lab 1 (ungraded revision)
 WEEK1_LAB_FLASHCARDS = [
     {
-        "prompt": "What is the SDLC?",
+        "id": 1,
+        "prompt": "What does SDLC stand for?",
         "topic_tag": "SDLC Fundamentals",
-        "marks": 1.0,
+        "marks": 0.0,
         "timer_seconds": 10,
-        "explanation": (
-            "Software Development Life Cycle: The formal structured process of planning, "
-            "analyzing, designing, coding, testing, and maintaining software applications to "
-            "ensure high quality within budget and schedule."
-        ),
+        "explanation": "Software Development Life Cycle.",
     },
     {
-        "prompt": "What is a Sprint in Scrum?",
+        "id": 2,
+        "prompt": "What is the purpose of the Planning phase?",
+        "topic_tag": "Planning",
+        "marks": 0.0,
+        "timer_seconds": 10,
+        "explanation": "Define project goals, scope, feasibility, costs, and timeline.",
+    },
+    {
+        "id": 3,
+        "prompt": "What happens during Requirements Analysis?",
+        "topic_tag": "Requirements Analysis",
+        "marks": 0.0,
+        "timer_seconds": 10,
+        "explanation": "Gather and finalize requirements with users and stakeholders.",
+    },
+    {
+        "id": 4,
+        "prompt": "What is the main characteristic of Waterfall?",
+        "topic_tag": "Waterfall Model",
+        "marks": 0.0,
+        "timer_seconds": 10,
+        "explanation": "Phases are completed sequentially.",
+    },
+    {
+        "id": 5,
+        "prompt": "What is a Scrum sprint?",
         "topic_tag": "Scrum Framework",
-        "marks": 1.0,
+        "marks": 0.0,
         "timer_seconds": 10,
-        "explanation": (
-            "A repeatable time-boxed iteration (commonly 1 to 4 weeks) during which a "
-            "development team creates a usable, releasable increment of the product."
-        ),
-    },
-    {
-        "prompt": "What is Integration Testing?",
-        "topic_tag": "Software Testing",
-        "marks": 1.0,
-        "timer_seconds": 10,
-        "explanation": (
-            "A testing level where software modules are combined and tested as a group to "
-            "expose defects in interfaces and interactions between connected components."
-        ),
-    },
-    {
-        "prompt": "What are the three environments in a modern software delivery lifecycle?",
-        "topic_tag": "Deployment Environments",
-        "marks": 1.0,
-        "timer_seconds": 10,
-        "explanation": (
-            "1. Development Environment (for active coding), 2. Quality Assurance (QA) "
-            "Environment (for validation and staging), 3. Production Environment (live for real users)."
-        ),
-    },
-    {
-        "prompt": "What are the three questions answered in a Daily Scrum meeting?",
-        "topic_tag": "Scrum Framework",
-        "marks": 1.0,
-        "timer_seconds": 10,
-        "explanation": (
-            "1. What did I complete yesterday? 2. What will I work on today? 3. Are there any "
-            "blockers or impediments hindering my progress?"
-        ),
+        "explanation": "A timeboxed period for delivering a defined increment.",
     },
 ]
 

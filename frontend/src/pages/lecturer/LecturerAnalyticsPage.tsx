@@ -100,7 +100,7 @@ export const LecturerAnalyticsPage: React.FC = () => {
         </div>
 
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Readiness Passed (≥ 35/60)</span>
+          <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Readiness Passed (≥ 17.5/30)</span>
           <div className="mt-2 text-2xl font-extrabold text-emerald-600">{summary.passed_count ?? 7}</div>
           <p className="text-[11px] text-emerald-700 mt-0.5 font-semibold">
             Pass Rate: {summary.pass_rate || summary.pass_rate_percentage || 77.8}%
@@ -108,7 +108,7 @@ export const LecturerAnalyticsPage: React.FC = () => {
         </div>
 
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <span className="text-xs font-bold text-rose-700 uppercase tracking-wider">Need Retake (&lt; 35/60)</span>
+          <span className="text-xs font-bold text-rose-700 uppercase tracking-wider">Need Retake (&lt; 17.5/30)</span>
           <div className="mt-2 text-2xl font-extrabold text-rose-600">{summary.failed_count ?? 2}</div>
           <p className="text-[11px] text-rose-600 mt-0.5 font-medium">Remediation required</p>
         </div>
@@ -116,8 +116,8 @@ export const LecturerAnalyticsPage: React.FC = () => {
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <span className="text-xs font-bold text-brand-700 uppercase tracking-wider">Average Score</span>
           <div className="mt-2 text-2xl font-extrabold text-brand-600">
-            {summary.average_score || 39.9}{' '}
-            <span className="text-xs font-medium text-slate-400">/ {summary.max_possible_score || 60}</span>
+            {summary.average_score ?? 19.9}{' '}
+            <span className="text-xs font-medium text-slate-400">/ {summary.max_possible_score ?? 30}</span>
           </div>
           <p className="text-[11px] text-slate-500 mt-0.5">Across readiness test attempts</p>
         </div>
@@ -452,7 +452,7 @@ export const LecturerAnalyticsPage: React.FC = () => {
                   <td className="px-4 py-4 whitespace-nowrap text-center">
                     {(s.readiness_score !== null && s.readiness_score !== undefined) || (s.attempts_count > 0 && s.best_score !== null) ? (
                       <span className="text-xs font-bold text-slate-900">
-                        {s.readiness_score ?? s.best_score}/60 <span className="text-slate-500 font-normal">({s.readiness_percentage ?? s.best_percentage}%)</span>
+                        {s.readiness_score ?? s.best_score}/30 <span className="text-slate-500 font-normal">({s.readiness_percentage ?? s.best_percentage}%)</span>
                       </span>
                     ) : (
                       <span className="text-xs text-slate-400">—</span>
@@ -465,11 +465,11 @@ export const LecturerAnalyticsPage: React.FC = () => {
                       </span>
                     ) : (s.readiness_passed ?? s.passed) ? (
                       <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Passed (≥35/60)
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Passed (≥17.5/30)
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 text-xs font-bold text-rose-800 bg-rose-100 px-2.5 py-0.5 rounded-full">
-                        <XCircle className="w-3.5 h-3.5 text-rose-600" /> Failed (&lt;35/60)
+                        <XCircle className="w-3.5 h-3.5 text-rose-600" /> Failed (&lt;17.5/30)
                       </span>
                     )}
                   </td>

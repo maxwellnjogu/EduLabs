@@ -116,7 +116,7 @@ export const LecturerFinalExamApprovalsPage: React.FC = () => {
         <div>
           <p className="font-bold text-purple-950">Readiness Pass vs. Official University Sitting Approval</p>
           <p className="mt-0.5 text-purple-800 leading-relaxed">
-            In compliance with academic governance standards, passing the internal MaxLabs Final Readiness Assessment (≥ 35/60 - 58.33%) and completing all 15 curriculum laboratories is an institutional prerequisite. Formal entry to the actual invigilated university examination hall requires explicit faculty sign-off, recorded below with immutable timestamps.
+            In compliance with academic governance standards, passing the internal MaxLabs Final Readiness Assessment (≥ 17.5/30 - 58.33%) and completing all 15 curriculum laboratories is an institutional prerequisite. Formal entry to the actual invigilated university examination hall requires explicit faculty sign-off, recorded below with immutable timestamps.
           </p>
         </div>
       </div>
@@ -132,7 +132,7 @@ export const LecturerFinalExamApprovalsPage: React.FC = () => {
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <span className="text-xs font-bold text-brand-700 uppercase">Readiness Exam Passed</span>
           <div className="mt-2 text-2xl font-extrabold text-brand-600">{metrics.final_test_passed_count ?? 0}</div>
-          <p className="text-[11px] text-brand-700 mt-0.5">Met 35/60 pass threshold</p>
+          <p className="text-[11px] text-brand-700 mt-0.5">Met 17.5/30 pass threshold</p>
         </div>
 
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
@@ -217,7 +217,7 @@ export const LecturerFinalExamApprovalsPage: React.FC = () => {
                   <td className="px-4 py-4 whitespace-nowrap text-center">
                     {r.raw_score !== null && r.raw_score !== undefined ? (
                       <span className="text-xs font-bold text-slate-900">
-                        {r.raw_score}/60 <span className="text-slate-500 font-normal">({r.final_test_score}%)</span>
+                        {r.raw_score}/30 <span className="text-slate-500 font-normal">({r.final_test_score}%)</span>
                       </span>
                     ) : (
                       <span className="text-xs text-slate-400">—</span>
@@ -244,11 +244,11 @@ export const LecturerFinalExamApprovalsPage: React.FC = () => {
                   <td className="px-4 py-4 whitespace-nowrap text-center">
                     {r.final_test_passed ? (
                       <span className="inline-flex items-center gap-1 text-xs font-bold text-brand-800 bg-brand-100 px-2.5 py-0.5 rounded-full">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-brand-600" /> Met 35/60 Criteria
+                        <CheckCircle2 className="w-3.5 h-3.5 text-brand-600" /> Met 17.5/30 Criteria
                       </span>
                     ) : r.attempts_count > 0 ? (
                       <span className="inline-flex items-center gap-1 text-xs font-bold text-rose-800 bg-rose-100 px-2.5 py-0.5 rounded-full">
-                        <XCircle className="w-3.5 h-3.5 text-rose-600" /> Did Not Meet 35/60
+                        <XCircle className="w-3.5 h-3.5 text-rose-600" /> Did Not Meet 17.5/30
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 text-xs text-slate-400 bg-slate-100 px-2.5 py-0.5 rounded-full">
@@ -285,7 +285,7 @@ export const LecturerFinalExamApprovalsPage: React.FC = () => {
                           ? 'bg-slate-50 text-slate-600 border-slate-200'
                           : 'bg-rose-50 text-rose-800 border-rose-200'
                       }`}>
-                        {r.pending_reason || (r.labs_completed < r.total_labs ? 'SDLC lab outstanding' : (r.attempts_count === 0 ? 'Readiness exam not attempted' : 'Readiness score below 35/60'))}
+                        {r.pending_reason || (r.labs_completed < r.total_labs ? 'SDLC lab outstanding' : (r.attempts_count === 0 ? 'Readiness exam not attempted' : 'Readiness score below 17.5/30'))}
                       </span>
                     )}
                   </td>

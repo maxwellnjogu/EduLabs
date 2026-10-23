@@ -12,12 +12,14 @@ from .models import (
     LearningMaterial,
     RevisionResource,
     LecturerRecommendedTopic,
+    PracticeQuestion,
 )
 from .serializers import (
     LearningWeekSerializer,
     LearningMaterialSerializer,
     RevisionResourceSerializer,
     LecturerRecommendedTopicSerializer,
+    PracticeQuestionSerializer,
 )
 from academics.serializers import AcademicSemesterSerializer, UnitSerializer
 from assessments.eligibility import get_readiness_status
@@ -389,7 +391,7 @@ class StudentWeekDetailView(views.APIView):
                 "written_marks": lab.written_marks,
                 "attempts_count": attempts.count(),
                 "max_retakes": lab.max_retakes,
-                "can_attempt": (attempts.count() < lab.max_retakes) or not (best_attempt and best_attempt.passed),
+                "can_attempt": (lab.assessment_type == Assessment.AssessmentType.LAB) or lab.allow_retakes or (attempts.count() < lab.max_retakes) or not (best_attempt and best_attempt.passed),
                 "latest_attempt": AssessmentAttemptSerializer(latest_attempt).data if latest_attempt else None,
                 "best_percentage": best_attempt.percentage if best_attempt else None,
                 "is_passed": best_attempt.passed if best_attempt else False,
@@ -418,6 +420,26 @@ class StudentWeekDetailView(views.APIView):
                     "explanation": "",
                 })
 
+        # Load published PracticeQuestion instances for this unit/week/assessment
+        quick_practice_qs = PracticeQuestion.objects.filter(
+            unit=week.unit,
+            status=PracticeQuestion.Status.PUBLISHED,
+        ).filter(
+            models.Q(week=week) | models.Q(assessment=lab) | models.Q(week__isnull=True)
+        ).order_by("order", "id")
+
+        if not quick_practice_qs.exists() and week.week_number == 1:
+            quick_practice_qs = PracticeQuestion.objects.filter(
+                unit=week.unit,
+                status=PracticeQuestion.Status.PUBLISHED,
+            ).order_by("order", "id")
+
+        quick_practice_data = PracticeQuestionSerializer(quick_practice_qs, many=True).data
+
+        # Flashcards for SDLC
+        from .demo_sdlc_content import WEEK1_LAB_FLASHCARDS
+        flashcards_data = WEEK1_LAB_FLASHCARDS if week.week_number == 1 else []
+
         return Response(
             {
                 "week_id": week.id,
@@ -428,9 +450,61 @@ class StudentWeekDetailView(views.APIView):
                 "unit": UnitSerializer(week.unit).data,
                 "materials": materials_data,
                 "lab": lab_data,
+                "flashcards": flashcards_data,
+                "quick_practice_questions": quick_practice_data,
                 "practice_questions": practice_questions,
             }
         )
+
+
+class StudentPracticeQuestionsView(views.APIView):
+    """
+    Public/Student view for published practice questions.
+    Only returns status=published questions.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        unit_id = request.query_params.get("unit_id")
+        week_id = request.query_params.get("week_id")
+        assessment_id = request.query_params.get("assessment_id")
+
+        qs = PracticeQuestion.objects.filter(status=PracticeQuestion.Status.PUBLISHED)
+        if unit_id:
+            qs = qs.filter(unit_id=unit_id)
+        if week_id:
+            qs = qs.filter(week_id=week_id)
+        if assessment_id:
+            qs = qs.filter(assessment_id=assessment_id)
+
+        qs = qs.order_by("order", "id")
+        return Response(PracticeQuestionSerializer(qs, many=True).data)
+
+
+class StudentCheckPracticeQuestionView(views.APIView):
+    """
+    Evaluate practice question response and return feedback.
+    Keeps practice scores completely separate from official lab assessment marks.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            q = PracticeQuestion.objects.get(pk=pk, status=PracticeQuestion.Status.PUBLISHED)
+        except PracticeQuestion.DoesNotExist:
+            return Response({"error": "Practice question not found or not published."}, status=status.HTTP_404_NOT_FOUND)
+
+        selected_option = (request.data.get("selected_option") or "").strip().upper()
+        is_correct = selected_option == q.correct_answer.strip().upper()
+
+        return Response({
+            "question_id": q.id,
+            "selected_option": selected_option,
+            "is_correct": is_correct,
+            "correct_answer": q.correct_answer,
+            "explanation": q.explanation,
+        })
+
 
 
 class StudentRevisionView(views.APIView):

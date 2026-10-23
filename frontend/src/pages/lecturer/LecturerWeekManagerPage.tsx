@@ -17,6 +17,7 @@ import {
   Sparkles,
   AlertCircle
 } from 'lucide-react';
+import { LecturerLearningContentGenerator } from '../../components/lecturer/LecturerLearningContentGenerator';
 
 export const LecturerWeekManagerPage: React.FC = () => {
   const { unitId } = useParams<{ unitId: string }>();
@@ -258,6 +259,15 @@ export const LecturerWeekManagerPage: React.FC = () => {
               </Link>
             </div>
           </div>
+
+          {/* AI Learning Content Generator for Curriculum Materials & Lab 1 */}
+          <LecturerLearningContentGenerator
+            unitId={Number(unitId)}
+            onPublished={() => {
+              if (selectedWeek) fetchMaterials(selectedWeek.id);
+              fetchWeeks();
+            }}
+          />
 
           {/* Published Materials List */}
           <div>

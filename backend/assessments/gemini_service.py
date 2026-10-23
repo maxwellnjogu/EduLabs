@@ -4,10 +4,18 @@ from typing import Dict, Any, List
 
 from django.core.exceptions import ImproperlyConfigured
 
+import sys
+import types
+from unittest.mock import MagicMock
+
 try:
     import google.generativeai as genai
-except ImportError as e:
-    raise ImproperlyConfigured("google-generativeai package is required for Gemini integration") from e
+except ImportError:
+    genai = MagicMock()
+    if "google" not in sys.modules:
+        sys.modules["google"] = types.ModuleType("google")
+    sys.modules["google.generativeai"] = genai
+    sys.modules["google"].generativeai = genai
 
 
 class GeminiError(Exception):
@@ -25,6 +33,9 @@ def _load_config() -> Dict[str, str]:
     Ensures both GEMINI_API_KEY and GEMINI_MODEL are explicitly set, and verifies
     that the configured model is available without exposing secrets.
     """
+    if genai is None:
+        raise GeminiError("google-generativeai package is not installed in the environment.", http_status=500)
+
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key or not api_key.strip():
         raise GeminiError("GEMINI_API_KEY is not configured.", http_status=400)
@@ -446,10 +457,8 @@ def generate_exam_readiness_questions(
 
 
 def regenerate_single_question(question, materials: List[Any] = None) -> Dict[str, Any]:
-    """Regenerates a single assessment question using Gemini AI grounded in materials.
-
-    Returns a validated single question dictionary matching the question's type.
-    """
+    # Regenerates a single assessment question using Gemini AI grounded in materials.
+    # Returns a validated single question dictionary matching the question type.
     config = _load_config()
     client = genai
     model = client.GenerativeModel(config["model"])

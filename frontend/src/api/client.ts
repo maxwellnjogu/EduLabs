@@ -234,6 +234,22 @@ class ApiClient {
     const url = timeframe ? `/api/student/leaderboard/?timeframe=${encodeURIComponent(timeframe)}` : "/api/student/leaderboard/";
     return this.request<any[]>(url);
   }
+
+  async getPracticeQuestions(params?: { unitId?: number; weekId?: number; assessmentId?: number }) {
+    const sp = new URLSearchParams();
+    if (params?.unitId) sp.append("unit_id", String(params.unitId));
+    if (params?.weekId) sp.append("week_id", String(params.weekId));
+    if (params?.assessmentId) sp.append("assessment_id", String(params.assessmentId));
+    const qs = sp.toString() ? `?${sp.toString()}` : "";
+    return this.request<any[]>(`/api/student/practice-questions/${qs}`);
+  }
+
+  async checkPracticeQuestion(questionId: number, selectedOption: string) {
+    return this.request<any>(`/api/student/practice-questions/${questionId}/check/`, {
+      method: "POST",
+      body: JSON.stringify({ selected_option: selectedOption }),
+    });
+  }
 }
 
 export const api = new ApiClient();
@@ -294,6 +310,12 @@ export const studentApi = {
       method: "POST",
       body: JSON.stringify({ query }),
     }),
+  }),
+  getPracticeQuestions: async (params?: { unitId?: number; weekId?: number; assessmentId?: number }) => ({
+    data: await api.getPracticeQuestions(params),
+  }),
+  checkPracticeQuestion: async (questionId: number, selectedOption: string) => ({
+    data: await api.checkPracticeQuestion(questionId, selectedOption),
   }),
 };
 
@@ -385,6 +407,12 @@ export const lecturerApi = {
       body: JSON.stringify(data),
     }),
   }),
+  updateQuestion: async (questionId: number, data: any) => ({
+    data: await api.request<any>(`/api/lecturer/questions/${questionId}/`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+  }),
 
   deleteQuestion: async (questionId: number) => ({
     data: await api.request<any>(`/api/lecturer/questions/${questionId}/`, {
@@ -409,9 +437,14 @@ export const lecturerApi = {
       body: JSON.stringify({ type: "resource", ...data }),
     }),
   }),
+  getExamReadinessConfig: async (unitId: number) => ({
+    data: await api.request<any>(`/api/lecturer/units/${unitId}/generate-exam-readiness/`),
+  }),
   generateExamReadiness: async (
     unitId: number,
-    data: {
+    data?: {
+      action?: string;
+      individual_performance?: boolean;
       topics?: string[];
       weak_areas?: string[];
       mcq_count?: number;
@@ -421,7 +454,7 @@ export const lecturerApi = {
   ) => ({
     data: await api.request<any>(`/api/lecturer/units/${unitId}/generate-exam-readiness/`, {
       method: "POST",
-      body: JSON.stringify(data),
+      body: JSON.stringify(data || {}),
     }),
   }),
   getFinalExamApprovals: async (unitId: number) => ({
@@ -431,6 +464,43 @@ export const lecturerApi = {
     data: await api.request<any>(`/api/lecturer/units/${unitId}/final-exam-approvals/`, {
       method: "POST",
       body: JSON.stringify(data),
+    }),
+  }),
+  getPracticeQuestions: async (params?: { unitId?: number; weekId?: number; assessmentId?: number }) => {
+    const sp = new URLSearchParams();
+    if (params?.unitId) sp.append("unit_id", String(params.unitId));
+    if (params?.weekId) sp.append("week_id", String(params.weekId));
+    if (params?.assessmentId) sp.append("assessment_id", String(params.assessmentId));
+    const qs = sp.toString() ? `?${sp.toString()}` : "";
+    return { data: await api.request<any[]>(`/api/lecturer/practice-questions/${qs}`) };
+  },
+  createPracticeQuestion: async (data: any) => ({
+    data: await api.request<any>("/api/lecturer/practice-questions/", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  }),
+  updatePracticeQuestion: async (questionId: number, data: any) => ({
+    data: await api.request<any>(`/api/lecturer/practice-questions/${questionId}/`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  }),
+  deletePracticeQuestion: async (questionId: number) => ({
+    data: await api.request<any>(`/api/lecturer/practice-questions/${questionId}/`, {
+      method: "DELETE",
+    }),
+  }),
+  reorderPracticeQuestions: async (orderIds: number[]) => ({
+    data: await api.request<any>("/api/lecturer/practice-questions/reorder/", {
+      method: "POST",
+      body: JSON.stringify({ order_ids: orderIds }),
+    }),
+  }),
+  generateLearningContent: async (unitId: number, data?: { selected_modes?: string[]; action?: string }) => ({
+    data: await api.request<any>(`/api/lecturer/units/${unitId}/generate-learning-content/`, {
+      method: "POST",
+      body: JSON.stringify(data || {}),
     }),
   }),
 };

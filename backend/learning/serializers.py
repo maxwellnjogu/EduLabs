@@ -4,6 +4,7 @@ from .models import (
     LearningMaterial,
     RevisionResource,
     LecturerRecommendedTopic,
+    PracticeQuestion,
 )
 
 
@@ -133,3 +134,43 @@ class LecturerRecommendedTopicSerializer(serializers.ModelSerializer):
         if "justification" in data and not ret.get("rationale"):
             ret["rationale"] = data["justification"]
         return ret
+
+
+class PracticeQuestionSerializer(serializers.ModelSerializer):
+    unit_name = serializers.CharField(source="unit.name", read_only=True)
+    assessment_title = serializers.CharField(source="assessment.title", read_only=True, default=None)
+    created_by_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PracticeQuestion
+        fields = [
+            "id",
+            "unit",
+            "unit_name",
+            "week",
+            "assessment",
+            "assessment_title",
+            "topic",
+            "prompt",
+            "options",
+            "correct_answer",
+            "explanation",
+            "order",
+            "status",
+            "created_by",
+            "created_by_name",
+            "created_at",
+            "updated_at",
+        ]
+
+    def get_created_by_name(self, obj):
+        if obj.created_by:
+            name = obj.created_by.get_full_name()
+            return name if name else obj.created_by.username
+        return "Faculty"
+
+    def validate_options(self, value):
+        if not isinstance(value, list) or len(value) < 2:
+            raise serializers.ValidationError("Options must be a list of at least 2 choices.")
+        return value
+

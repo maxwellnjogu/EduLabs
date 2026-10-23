@@ -161,7 +161,12 @@ def get_final_clearance_data(unit, semester=None):
 
         raw_score = latest_att.score if latest_att else None
         pct = latest_att.percentage if latest_att else None
-        passed_readiness = (raw_score is not None and raw_score >= 35.0)
+        # Normalize score to 30-mark scale if stored out of 60
+        if raw_score is not None:
+            normalized_score = round((raw_score / 60.0) * 30.0, 1) if raw_score > 30.0 else round(raw_score, 1)
+        else:
+            normalized_score = None
+        passed_readiness = (normalized_score is not None and normalized_score >= 17.5)
         is_appr = elig.lecturer_approved if elig else False
 
         pending_reason = None
@@ -171,7 +176,7 @@ def get_final_clearance_data(unit, semester=None):
             elif len(attempts) == 0:
                 pending_reason = "Readiness exam not attempted"
             elif not passed_readiness:
-                pending_reason = "Readiness score below 35/60"
+                pending_reason = "Readiness score below 17.5/30"
 
         records.append({
             "student_id": primary_real_student.id,
@@ -184,13 +189,13 @@ def get_final_clearance_data(unit, semester=None):
             "lab_completion_status": "All Labs Completed" if labs_done == total_labs else "Labs Pending",
             "outstanding_lab": outstanding_name,
             "attempts_count": len(attempts),
-            "raw_score": round(raw_score, 1) if raw_score is not None else None,
+            "raw_score": normalized_score,
             "final_test_score": round(pct, 1) if pct is not None else None,
-            "total_marks": 60.0,
-            "pass_threshold_marks": 35.0,
+            "total_marks": 30.0,
+            "pass_threshold_marks": 17.5,
             "final_test_passed": passed_readiness,
             "grading_status": "Graded (Finalized)" if latest_att else "No Attempts",
-            "readiness_result": "Met 35/60 Criteria" if passed_readiness else ("Did Not Meet 35/60" if len(attempts) > 0 else "No Attempt"),
+            "readiness_result": "Met 17.5/30 Criteria" if passed_readiness else ("Did Not Meet 17.5/30" if len(attempts) > 0 else "No Attempt"),
             "is_approved_for_final_exam": is_appr,
             "approved_by": elig.approved_by.get_full_name() if (elig and elig.approved_by) else None,
             "approved_at": elig.approved_at.isoformat() if (elig and elig.approved_at) else None,
@@ -209,14 +214,18 @@ def get_final_clearance_data(unit, semester=None):
         approver = appr_info.get("approved_by")
         appr_at = appr_info.get("approved_at")
 
+        # Normalize score to 30-mark scale: (score / 60.0) * 30.0
+        normalized_score = round((score / 60.0) * 30.0, 1) if score is not None else None
+        passed_normalized = (normalized_score is not None and normalized_score >= 17.5) if att_count > 0 else False
+
         pending_reason = None
         if not is_appr:
             if labs_done < total_labs:
                 pending_reason = f"SDLC lab outstanding" if out_lab == "SDLC Lab 1" else f"Labs incomplete ({labs_done}/{total_labs} completed)"
             elif att_count == 0:
                 pending_reason = "Readiness exam not attempted"
-            elif not passed:
-                pending_reason = "Readiness score below 35/60"
+            elif not passed_normalized:
+                pending_reason = "Readiness score below 17.5/30"
 
         records.append({
             "student_id": base_id + idx,
@@ -229,19 +238,19 @@ def get_final_clearance_data(unit, semester=None):
             "lab_completion_status": "All Labs Completed" if labs_done == total_labs else "Labs Pending",
             "outstanding_lab": out_lab,
             "attempts_count": att_count,
-            "raw_score": score,
+            "raw_score": normalized_score,
             "final_test_score": pct,
-            "total_marks": 60.0,
-            "pass_threshold_marks": 35.0,
-            "final_test_passed": passed,
+            "total_marks": 30.0,
+            "pass_threshold_marks": 17.5,
+            "final_test_passed": passed_normalized,
             "grading_status": "Graded (Finalized)" if att_count > 0 else "No Attempts",
-            "readiness_result": "Met 35/60 Criteria" if passed else ("Did Not Meet 35/60" if att_count > 0 else "No Attempt"),
+            "readiness_result": "Met 17.5/30 Criteria" if passed_normalized else ("Did Not Meet 17.5/30" if att_count > 0 else "No Attempt"),
             "is_approved_for_final_exam": is_appr,
             "approved_by": approver,
             "approved_at": appr_at,
-            "approval_status": "approved" if is_appr else ("eligible" if (labs_done == total_labs and att_count > 0 and passed) else "not_qualified"),
+            "approval_status": "approved" if is_appr else ("eligible" if (labs_done == total_labs and att_count > 0 and passed_normalized) else "not_qualified"),
             "pending_reason": pending_reason,
-            "can_approve": (labs_done == total_labs and att_count > 0 and passed and not is_appr),
+            "can_approve": (labs_done == total_labs and att_count > 0 and passed_normalized and not is_appr),
             "is_synthetic": True,
             "source": "presentation",
         })
@@ -312,8 +321,9 @@ def approve_candidate_for_final_exam(unit, student_id_or_adm, approver_user, is_
         if not latest_att:
             return False, "Approval Denied: Readiness exam not attempted."
 
-        if latest_att.score < 35.0:
-            return False, f"Approval Denied: Readiness score ({latest_att.score:.1f}/60) does not meet the pass threshold of 35/60."
+        norm_score = round((latest_att.score / 60.0) * 30.0, 1) if latest_att.score > 30.0 else round(latest_att.score, 1)
+        if norm_score < 17.5:
+            return False, f"Approval Denied: Readiness score ({norm_score:.1f}/30) does not meet the pass threshold of 17.5/30."
 
         elig, _ = FinalExamEligibility.objects.get_or_create(
             student=real_student,
@@ -364,10 +374,11 @@ def approve_candidate_for_final_exam(unit, student_id_or_adm, approver_user, is_
         if att_count == 0:
             return False, "Approval Denied: Readiness exam not attempted."
 
-        # Check condition 3: Authoritative score >= 35/60
-        if score is None or score < 35.0:
-            score_str = f"{score:.1f}/60" if score is not None else "0/60"
-            return False, f"Approval Denied: Readiness score ({score_str}) does not meet the pass threshold of 35/60."
+        # Check condition 3: Authoritative score >= 17.5/30
+        norm_score = round((score / 60.0) * 30.0, 1) if score is not None else None
+        if norm_score is None or norm_score < 17.5:
+            score_str = f"{norm_score:.1f}/30" if norm_score is not None else "0/30"
+            return False, f"Approval Denied: Readiness score ({score_str}) does not meet the pass threshold of 17.5/30."
 
         # Check condition 4: Not already approved
         approvals = load_presentation_approvals()
@@ -523,7 +534,8 @@ def get_cohort_analytics_data(unit, lab_assessment=None):
         "average_score": avg_score,
         "pass_rate": pass_rate,
         "pass_rate_percentage": pass_rate,
-        "max_possible_score": 60,
+        "max_possible_score": 30,
+        "pass_threshold_marks": 17.5,
     }
 
     # Weak topics across the curriculum

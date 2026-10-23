@@ -75,6 +75,11 @@ class Assessment(models.Model):
         default=True,
         help_text="Show feedback and correct answers on completion/failure",
     )
+    activity_config = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Configured testing modes and per-mode parameters",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -89,10 +94,15 @@ class Assessment(models.Model):
 class AssessmentQuestion(models.Model):
     class QuestionType(models.TextChoices):
         MCQ = "mcq", "Multiple Choice Question"
+        TRIVIA = "trivia", "Trivia Exercise"
+        MULTI_SELECT = "multi_select", "Multiple-Select Question"
+        FILL_BLANKS = "fill_blanks", "Fill in the Blanks"
         FLASHCARD = "flashcard", "Flashcard (Concept & Answer)"
-        WRITTEN = "written", "Short Written Response"
         MATCHING = "matching", "Term-to-Definition Matching"
         DRAG_DROP = "drag_drop", "Drag & Drop Phase Ordering"
+        WRITTEN = "written", "Short Written Response"
+        SCENARIO = "scenario", "What Would You Do? Scenario"
+        CASE_STUDY = "case_study", "Case Study Analysis"
 
     assessment = models.ForeignKey(
         Assessment,
@@ -127,7 +137,16 @@ class AssessmentQuestion(models.Model):
         blank=True,
         help_text="List of {term: '...', definition: '...'} for matching questions",
     )
+    config = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Structured mode-specific metadata: accepted_answers, case_study_data, scoring_rules, etc.",
+    )
     order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Active questions are included in live student assessments. Inactive questions are retired for historical audit integrity.",
+    )
 
     class Meta:
         ordering = ["order", "id"]
@@ -220,6 +239,11 @@ class StudentAnswer(models.Model):
         default=dict,
         blank=True,
         help_text="Student's matched pair mappings {term: definition}",
+    )
+    answer_data = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Structured answers: multi_select option IDs, fill-in blanks, case study text, etc.",
     )
     is_correct = models.BooleanField(default=False)
     score_awarded = models.FloatField(default=0.0)

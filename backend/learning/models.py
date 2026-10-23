@@ -214,3 +214,76 @@ class LecturerRecommendedTopic(models.Model):
 
     def __str__(self):
         return f"{self.unit.code}: {self.title} ({self.priority})"
+
+
+class PracticeQuestion(models.Model):
+    class Status(models.TextChoices):
+        DRAFT = "draft", "Draft"
+        PUBLISHED = "published", "Published"
+
+    unit = models.ForeignKey(
+        Unit,
+        on_delete=models.CASCADE,
+        related_name="practice_questions",
+    )
+    week = models.ForeignKey(
+        LearningWeek,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="practice_questions",
+    )
+    assessment = models.ForeignKey(
+        "assessments.Assessment",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="practice_questions",
+        help_text="Associated lab assessment",
+    )
+    topic = models.CharField(
+        max_length=150,
+        default="SDLC Fundamentals",
+        help_text="Topic classification tag for the practice question",
+    )
+    prompt = models.TextField(help_text="The practice question prompt")
+    options = models.JSONField(
+        default=list,
+        help_text="List of 4 options e.g. [{'key': 'A', 'text': '...'}, {'key': 'B', 'text': '...'}, ...]",
+    )
+    correct_answer = models.CharField(
+        max_length=10,
+        help_text="Key of the correct choice (e.g. 'A', 'B', 'C', or 'D')",
+    )
+    explanation = models.TextField(
+        blank=True,
+        help_text="Explanation feedback for the correct answer",
+    )
+    order = models.PositiveIntegerField(default=0)
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PUBLISHED,
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_practice_questions",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["order", "id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["unit", "prompt"],
+                name="unique_practice_question_per_unit_prompt",
+            )
+        ]
+
+    def __str__(self):
+        return f"[{self.status.upper()}] {self.prompt[:50]} ({self.correct_answer})"
+
