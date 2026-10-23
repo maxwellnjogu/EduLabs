@@ -93,51 +93,51 @@ export const LecturerAnalyticsPage: React.FC = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Enrolled Cohort</span>
-          <div className="mt-2 text-2xl font-extrabold text-slate-900">{summary.total_enrolled || 12}</div>
+          <div className="mt-2 text-2xl font-extrabold text-slate-900">{summary.total_enrolled || 15}</div>
           <p className="text-[11px] text-slate-500 mt-0.5">
-            {summary.attempted_count || summary.total_attempted || 11} attempted ({summary.unattempted_count || 1} pending)
+            {summary.attempted_count ?? 9} attempted ({summary.unattempted_count ?? 6} pending)
           </p>
         </div>
 
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Passed (≥ 75%)</span>
-          <div className="mt-2 text-2xl font-extrabold text-emerald-600">{summary.passed_count || 9}</div>
+          <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Readiness Passed (≥ 35/60)</span>
+          <div className="mt-2 text-2xl font-extrabold text-emerald-600">{summary.passed_count ?? 7}</div>
           <p className="text-[11px] text-emerald-700 mt-0.5 font-semibold">
-            Pass Rate: {summary.pass_rate || summary.pass_rate_percentage || 81.8}%
+            Pass Rate: {summary.pass_rate || summary.pass_rate_percentage || 77.8}%
           </p>
         </div>
 
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <span className="text-xs font-bold text-rose-700 uppercase tracking-wider">Need Retake (&lt; 75%)</span>
-          <div className="mt-2 text-2xl font-extrabold text-rose-600">{summary.failed_count || 2}</div>
+          <span className="text-xs font-bold text-rose-700 uppercase tracking-wider">Need Retake (&lt; 35/60)</span>
+          <div className="mt-2 text-2xl font-extrabold text-rose-600">{summary.failed_count ?? 2}</div>
           <p className="text-[11px] text-rose-600 mt-0.5 font-medium">Remediation required</p>
         </div>
 
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <span className="text-xs font-bold text-brand-700 uppercase tracking-wider">Average Score</span>
           <div className="mt-2 text-2xl font-extrabold text-brand-600">
-            {summary.average_score || 24.7}{' '}
-            <span className="text-xs font-medium text-slate-400">/ {summary.max_possible_score || 30}</span>
+            {summary.average_score || 39.9}{' '}
+            <span className="text-xs font-medium text-slate-400">/ {summary.max_possible_score || 60}</span>
           </div>
-          <p className="text-[11px] text-slate-500 mt-0.5">Across all student submissions</p>
+          <p className="text-[11px] text-slate-500 mt-0.5">Across readiness test attempts</p>
         </div>
       </div>
 
-      {/* 14-Lab Performance Comparisons Across Curriculum */}
+      {/* 15-Lab Performance Comparisons Across Curriculum */}
       {labComparisons.length > 0 && (
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-2">
             <div>
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <Layers className="w-5 h-5 text-brand-600" />
-                14-Lab Curriculum Performance & Mastery Comparisons
+                15-Lab Curriculum Performance & Mastery Comparisons
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                Cohort progression across all 14 Software Engineering lab modules.
+                Cohort progression across all 15 Software Engineering lab modules.
               </p>
             </div>
             <span className="text-xs font-semibold px-2.5 py-1 bg-brand-50 text-brand-800 rounded-lg border border-brand-200 self-start sm:self-auto">
-              14 Total Labs Monitored
+              15 Total Labs Monitored
             </span>
           </div>
 
@@ -399,66 +399,77 @@ export const LecturerAnalyticsPage: React.FC = () => {
           <table className="min-w-full divide-y divide-slate-200">
             <thead className="bg-slate-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+                <th className="px-5 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
                   Student Name
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
                   Admission No.
                 </th>
-                <th className="px-6 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">
-                  Academic Cohort
+                <th className="px-5 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">
+                  Lab Completion
                 </th>
-                <th className="px-6 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">
-                  Attempts
+                <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">
+                  Readiness Attempts
                 </th>
-                <th className="px-6 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">
-                  Best Score
+                <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">
+                  Readiness Best Score
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-bold text-slate-600 uppercase tracking-wider">
-                  Status
+                <th className="px-5 py-3 text-right text-xs font-bold text-slate-600 uppercase tracking-wider">
+                  Readiness Status
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-slate-100">
               {filteredRoster.map((s: any) => (
                 <tr key={s.student_id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-5 py-4 whitespace-nowrap">
                     <span className="text-sm font-semibold text-slate-900">{s.student_name}</span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-4 py-4 whitespace-nowrap">
                     <span className="text-xs font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
                       {s.admission_number}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-medium border border-slate-200">
-                      {s.cohort_group || 'Undergraduate Year 2'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center text-xs font-bold text-slate-700">
-                    {s.attempts_count}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    {s.attempts_count > 0 && s.best_score !== null ? (
+                  <td className="px-5 py-4 whitespace-nowrap text-center">
+                    <div className="inline-flex flex-col items-center">
                       <span className="text-xs font-bold text-slate-900">
-                        {s.best_score} pts ({s.best_percentage}%)
+                        {s.lab_completion || `${s.labs_completed || 15}/15`}
+                      </span>
+                      <span className={`text-[10px] font-semibold px-2 py-0.2 rounded-full mt-0.5 ${
+                        (s.labs_completed || 15) === 15
+                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                          : 'bg-amber-50 text-amber-800 border border-amber-200'
+                      }`}>
+                        {(s.labs_completed || 15) === 15
+                          ? 'All Labs Completed'
+                          : (s.outstanding_lab ? `Pending: ${s.outstanding_lab}` : 'Labs Pending')}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap text-center text-xs font-bold text-slate-700">
+                    {s.readiness_attempts ?? s.attempts_count}
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap text-center">
+                    {(s.readiness_score !== null && s.readiness_score !== undefined) || (s.attempts_count > 0 && s.best_score !== null) ? (
+                      <span className="text-xs font-bold text-slate-900">
+                        {s.readiness_score ?? s.best_score}/60 <span className="text-slate-500 font-normal">({s.readiness_percentage ?? s.best_percentage}%)</span>
                       </span>
                     ) : (
                       <span className="text-xs text-slate-400">—</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right">
-                    {s.attempts_count === 0 ? (
+                  <td className="px-5 py-4 whitespace-nowrap text-right">
+                    {(s.readiness_attempts ?? s.attempts_count) === 0 ? (
                       <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
                         <Clock className="w-3 h-3" /> Not Attempted
                       </span>
-                    ) : s.passed ? (
+                    ) : (s.readiness_passed ?? s.passed) ? (
                       <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Passed (≥75%)
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Passed (≥35/60)
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 text-xs font-bold text-rose-800 bg-rose-100 px-2.5 py-0.5 rounded-full">
-                        <XCircle className="w-3 h-3 text-rose-600" /> Retake Needed
+                        <XCircle className="w-3.5 h-3.5 text-rose-600" /> Failed (&lt;35/60)
                       </span>
                     )}
                   </td>

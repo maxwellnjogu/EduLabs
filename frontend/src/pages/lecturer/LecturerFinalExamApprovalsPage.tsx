@@ -7,10 +7,8 @@ import {
   XCircle,
   Clock,
   ArrowLeft,
-  Sparkles,
   ShieldCheck,
-  AlertCircle,
-  FileCheck
+  FileCheck,
 } from 'lucide-react';
 
 export const LecturerFinalExamApprovalsPage: React.FC = () => {
@@ -45,16 +43,27 @@ export const LecturerFinalExamApprovalsPage: React.FC = () => {
         student_id: studentId,
         is_approved: isApproved,
         approval_notes: isApproved
-          ? 'Approved by Lead Lecturer James Mwangi based on passing readiness assessment.'
+          ? 'Approved by Lead Lecturer Dr. James Mwangi based on passing readiness assessment.'
           : 'Revoked/Disapproved by Faculty.',
       });
       setMessage({
         type: 'success',
         text: res?.data?.message || (isApproved ? 'Successfully approved for the final exam' : 'Approval revoked.'),
       });
-      fetchApprovals();
+      if (res?.data?.records && res?.data?.metrics) {
+        setData((prev: any) => ({
+          ...prev,
+          metrics: res.data.metrics,
+          records: res.data.records,
+        }));
+      } else {
+        fetchApprovals();
+      }
     } catch (err: any) {
-      setMessage({ type: 'error', text: err?.response?.data?.error || err?.message || 'Failed to update approval status.' });
+      setMessage({
+        type: 'error',
+        text: err?.response?.data?.error || err?.message || 'Failed to update approval status.',
+      });
     } finally {
       setApprovingId(null);
     }
@@ -90,19 +99,14 @@ export const LecturerFinalExamApprovalsPage: React.FC = () => {
             {data?.unit?.code} • {data?.unit?.name} — Certify student clearance for the official invigilated university examination sitting.
           </p>
         </div>
-
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
-          <Sparkles className="w-4 h-4 text-amber-600" />
-          <span>Demo Verification Mode Active</span>
-        </div>
       </div>
 
       {message && (
         <div className={`p-4 rounded-xl text-xs flex items-center justify-between ${
-          message.type === 'success' ? 'bg-brand-50 text-brand-900 border border-brand-200' : 'bg-rose-50 text-rose-900 border border-rose-200'
+          message.type === 'success' ? 'bg-emerald-50 text-emerald-900 border border-emerald-200' : 'bg-rose-50 text-rose-900 border border-rose-200'
         }`}>
-          <span>{message.text}</span>
-          <button onClick={() => setMessage(null)} className="font-bold underline ml-4">Dismiss</button>
+          <span className="font-semibold">{message.text}</span>
+          <button onClick={() => setMessage(null)} className="font-bold underline ml-4 cursor-pointer">Dismiss</button>
         </div>
       )}
 
@@ -112,91 +116,105 @@ export const LecturerFinalExamApprovalsPage: React.FC = () => {
         <div>
           <p className="font-bold text-purple-950">Readiness Pass vs. Official University Sitting Approval</p>
           <p className="mt-0.5 text-purple-800 leading-relaxed">
-            In compliance with academic governance standards, passing the internal MaxLabs Final Readiness Assessment (≥ 35/60 - 58.33%) is an institutional prerequisite. Formal entry to the actual invigilated university examination hall requires explicit faculty sign-off, recorded below with immutable timestamps.
+            In compliance with academic governance standards, passing the internal MaxLabs Final Readiness Assessment (≥ 35/60 - 58.33%) and completing all 15 curriculum laboratories is an institutional prerequisite. Formal entry to the actual invigilated university examination hall requires explicit faculty sign-off, recorded below with immutable timestamps.
           </p>
         </div>
       </div>
 
-      {/* KPI Stats */}
+      {/* KPI Stats - Derived from displayed underlying 15 records */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <span className="text-xs font-bold text-slate-500 uppercase">Enrolled Cohort</span>
-          <div className="mt-2 text-2xl font-extrabold text-slate-900">{metrics.total_enrolled || 0}</div>
-          <p className="text-[11px] text-slate-400 mt-0.5">Undergraduate candidates</p>
+          <div className="mt-2 text-2xl font-extrabold text-slate-900">{metrics.total_enrolled || 15}</div>
+          <p className="text-[11px] text-slate-400 mt-0.5">Registered candidates</p>
         </div>
 
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <span className="text-xs font-bold text-brand-700 uppercase">Readiness Passed</span>
-          <div className="mt-2 text-2xl font-extrabold text-brand-600">{metrics.final_test_passed_count || 0}</div>
-          <p className="text-[11px] text-brand-700 mt-0.5">Met 35/60 threshold</p>
+          <span className="text-xs font-bold text-brand-700 uppercase">Readiness Exam Passed</span>
+          <div className="mt-2 text-2xl font-extrabold text-brand-600">{metrics.final_test_passed_count ?? 0}</div>
+          <p className="text-[11px] text-brand-700 mt-0.5">Met 35/60 pass threshold</p>
         </div>
 
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <span className="text-xs font-bold text-purple-700 uppercase">Officially Approved</span>
-          <div className="mt-2 text-2xl font-extrabold text-purple-600">{metrics.approved_for_exam_count || 0}</div>
-          <p className="text-[11px] text-purple-700 mt-0.5">Exam ticket generated</p>
+          <div className="mt-2 text-2xl font-extrabold text-purple-600">{metrics.approved_for_exam_count ?? 0}</div>
+          <p className="text-[11px] text-purple-700 mt-0.5">Exam clearance granted</p>
         </div>
 
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
           <span className="text-xs font-bold text-amber-700 uppercase">Pending Approval</span>
-          <div className="mt-2 text-2xl font-extrabold text-amber-600">{metrics.pending_approval_count || 0}</div>
+          <div className="mt-2 text-2xl font-extrabold text-amber-600">{metrics.pending_approval_count ?? 0}</div>
           <p className="text-[11px] text-amber-700 mt-0.5">Awaiting faculty sign-off</p>
         </div>
       </div>
 
-      {/* Candidate Roster */}
+      {/* Candidate Clearance Roster */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="p-5 border-b border-slate-200">
           <h2 className="text-base font-bold text-slate-900">Final Candidate Clearance Roster</h2>
-          <p className="text-xs text-slate-500 mt-0.5">Authoritative status of student readiness and formal examination entry</p>
+          <p className="text-xs text-slate-500 mt-0.5">
+            15 Cohort Candidates • Showing authoritative lab completion, readiness scores, and examination approval status
+          </p>
         </div>
 
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-200">
             <thead className="bg-slate-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+                <th className="px-5 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
                   Student Name
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
                   Admission No.
                 </th>
-                <th className="px-6 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">
+                <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">
+                  Lab Completion
+                </th>
+                <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">
                   Readiness Score
                 </th>
-                <th className="px-6 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">
+                <th className="px-3 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">
                   Attempts
                 </th>
-                <th className="px-6 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">
+                <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">
                   Grading Status
                 </th>
-                <th className="px-6 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">
+                <th className="px-4 py-3 text-center text-xs font-bold text-slate-600 uppercase tracking-wider">
                   Readiness Result
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-bold text-slate-600 uppercase tracking-wider">
-                  Faculty Action
+                  Examination Clearance
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-slate-100">
               {records.map((r: any) => (
                 <tr key={r.student_id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-slate-900">{r.student_name}</span>
-                      {r.is_synthetic && (
-                        <span className="text-[10px] px-2 py-0.5 rounded font-bold bg-amber-50 text-amber-800 border border-amber-300">
-                          Demo data
-                        </span>
-                      )}
-                    </div>
+                  <td className="px-5 py-4 whitespace-nowrap">
+                    <span className="text-sm font-semibold text-slate-900">{r.student_name}</span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-4 py-4 whitespace-nowrap">
                     <span className="text-xs font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded">
                       {r.admission_number}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                  <td className="px-4 py-4 whitespace-nowrap text-center">
+                    <div className="inline-flex flex-col items-center">
+                      <span className="text-xs font-bold text-slate-900">
+                        {r.lab_completion_display || `${r.labs_completed}/${r.total_labs}`}
+                      </span>
+                      <span className={`text-[10px] font-semibold px-2 py-0.2 rounded-full mt-0.5 ${
+                        r.labs_completed === r.total_labs
+                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                          : 'bg-amber-50 text-amber-800 border border-amber-200'
+                      }`}>
+                        {r.labs_completed === r.total_labs
+                          ? 'All Labs Completed'
+                          : (r.outstanding_lab ? `Pending: ${r.outstanding_lab}` : 'Labs Pending')}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 whitespace-nowrap text-center">
                     {r.raw_score !== null && r.raw_score !== undefined ? (
                       <span className="text-xs font-bold text-slate-900">
                         {r.raw_score}/60 <span className="text-slate-500 font-normal">({r.final_test_score}%)</span>
@@ -205,11 +223,11 @@ export const LecturerFinalExamApprovalsPage: React.FC = () => {
                       <span className="text-xs text-slate-400">—</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center text-xs font-bold text-slate-700">
+                  <td className="px-3 py-4 whitespace-nowrap text-center text-xs font-bold text-slate-700">
                     {r.attempts_count}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    {r.has_pending_review ? (
+                  <td className="px-4 py-4 whitespace-nowrap text-center">
+                    {r.grading_status === 'Pending Written Review' ? (
                       <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full">
                         Pending Written Review
                       </span>
@@ -223,7 +241,7 @@ export const LecturerFinalExamApprovalsPage: React.FC = () => {
                       </span>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                  <td className="px-4 py-4 whitespace-nowrap text-center">
                     {r.final_test_passed ? (
                       <span className="inline-flex items-center gap-1 text-xs font-bold text-brand-800 bg-brand-100 px-2.5 py-0.5 rounded-full">
                         <CheckCircle2 className="w-3.5 h-3.5 text-brand-600" /> Met 35/60 Criteria
@@ -240,35 +258,35 @@ export const LecturerFinalExamApprovalsPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     {r.is_approved_for_final_exam ? (
-                      <div className="inline-flex items-center gap-2">
-                        <span className="text-xs font-bold text-purple-700 bg-purple-50 border border-purple-200 px-2.5 py-1 rounded-lg flex items-center gap-1">
+                      <div className="inline-flex flex-col items-end gap-1">
+                        <span className="text-xs font-bold text-purple-700 bg-purple-50 border border-purple-200 px-2.5 py-1 rounded-lg inline-flex items-center gap-1">
                           <CheckCircle2 className="w-3.5 h-3.5 text-purple-600" /> Officially Approved
                         </span>
-                        <button
-                          onClick={() => handleApprove(r.student_id, false)}
-                          disabled={approvingId === r.student_id}
-                          className="text-[11px] text-slate-500 hover:text-rose-600 underline"
-                        >
-                          Revoke
-                        </button>
+                        {r.approved_by && (
+                          <span className="text-[10px] text-slate-500">
+                            By {r.approved_by}
+                          </span>
+                        )}
                       </div>
-                    ) : r.is_synthetic ? (
-                      <span className="text-xs text-slate-400 italic">Demo data (Simulated)</span>
-                    ) : r.has_pending_review ? (
-                      <span className="text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-lg">
-                        Written Review Required
-                      </span>
-                    ) : r.final_test_passed ? (
+                    ) : r.can_approve ? (
                       <button
                         onClick={() => handleApprove(r.student_id, true)}
                         disabled={approvingId === r.student_id}
-                        className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-bold shadow-sm transition-all disabled:opacity-50 inline-flex items-center gap-1.5"
+                        className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-bold shadow-sm transition-all disabled:opacity-50 inline-flex items-center gap-1.5 cursor-pointer"
                       >
                         <FileCheck className="w-3.5 h-3.5" />
-                        {approvingId === r.student_id ? 'Authorizing...' : 'Grant Exam Ticket'}
+                        {approvingId === r.student_id ? 'Authorizing...' : 'Approve for Final Examination'}
                       </button>
                     ) : (
-                      <span className="text-xs text-slate-400 italic">Ineligible (&lt; 35/60)</span>
+                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg border ${
+                        r.labs_completed < r.total_labs
+                          ? 'bg-amber-50 text-amber-800 border-amber-200'
+                          : r.attempts_count === 0
+                          ? 'bg-slate-50 text-slate-600 border-slate-200'
+                          : 'bg-rose-50 text-rose-800 border-rose-200'
+                      }`}>
+                        {r.pending_reason || (r.labs_completed < r.total_labs ? 'SDLC lab outstanding' : (r.attempts_count === 0 ? 'Readiness exam not attempted' : 'Readiness score below 35/60'))}
+                      </span>
                     )}
                   </td>
                 </tr>

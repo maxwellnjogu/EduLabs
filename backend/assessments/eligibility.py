@@ -10,14 +10,14 @@ from .models import Assessment, AssessmentAttempt
 
 
 def get_readiness_status(student, unit, semester):
-    # The curriculum requires 14 weekly labs (weeks 1 to 14).
+    # The curriculum contains exactly 15 weekly labs (weeks 1 to 15).
     labs = list(
         Assessment.objects.filter(
             unit=unit,
             semester=semester,
             assessment_type=Assessment.AssessmentType.LAB,
             week__week_number__gte=1,
-            week__week_number__lte=14,
+            week__week_number__lte=15,
         ).order_by("week__week_number", "id")
     )
     if not labs:

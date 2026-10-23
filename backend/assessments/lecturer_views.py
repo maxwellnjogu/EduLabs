@@ -47,6 +47,10 @@ from learning.demo_sdlc_content import (
     PREPARED_SDLC_DRAG_DROP,
     PREPARED_SDLC_MATCHING,
 )
+from .presentation_analytics import (
+    get_final_clearance_data,
+    approve_candidate_for_final_exam,
+)
 
 
 class LecturerGenerateDemoContentView(views.APIView):
@@ -635,8 +639,8 @@ class LecturerUnitAnalyticsView(views.APIView):
 
 class LecturerFinalExamApprovalsView(views.APIView):
     """
-    Final University Exam Eligibility & Approval Page:
-    Shows students who have sat readiness assessment and allows lecturer sign-off.
+    Final University Exam Eligibility & Clearance Approvals:
+    Shows the 15 student candidates with lab completion, readiness scores, and approval status.
     Pass mark is 35/60.
     """
     permission_classes = [IsLecturer]
@@ -648,101 +652,8 @@ class LecturerFinalExamApprovalsView(views.APIView):
             return Response({"error": "Unit not found."}, status=status.HTTP_404_NOT_FOUND)
 
         semester = AcademicSemester.objects.filter(status=AcademicSemester.Status.ACTIVE).first()
-        readiness_assessment = Assessment.objects.filter(
-            unit=unit,
-            assessment_type=Assessment.AssessmentType.FINAL_READINESS,
-        ).first()
-
-        enrolments = StudentEnrolment.objects.filter(unit=unit, semester=semester, is_active=True).select_related("student")
-        
-        records = []
-        passed_count = 0
-        approved_count = 0
-        pending_count = 0
-
-        for enr in enrolments:
-            student = enr.student
-            is_real_demo_student = (student.admission_number == "RU-2026-041" or student.username == "akamau")
-            is_synthetic = not is_real_demo_student
-
-            attempts = []
-            if readiness_assessment:
-                attempts = list(AssessmentAttempt.objects.filter(
-                    assessment=readiness_assessment,
-                    student=student,
-                    is_completed=True,
-                ).order_by("-completed_at"))
-
-            latest_attempt = attempts[0] if attempts else None
-            eligibility = FinalExamEligibility.objects.filter(student=student, unit=unit, semester=semester).first()
-
-            raw_score = latest_attempt.score if latest_attempt else 0.0
-            total_marks = latest_attempt.total_marks if latest_attempt else 60.0
-            percentage = latest_attempt.percentage if latest_attempt else 0.0
-            final_passed = (raw_score >= 35.0) or (percentage >= 58.33)
-
-            is_approved = eligibility.lecturer_approved if eligibility else False
-            if is_approved:
-                approved_count += 1
-            elif final_passed:
-                pending_count += 1
-
-            if final_passed:
-                passed_count += 1
-
-            has_pending_review = False
-            if latest_attempt:
-                written_answers = StudentAnswer.objects.filter(
-                    attempt=latest_attempt,
-                    question__question_type=AssessmentQuestion.QuestionType.WRITTEN,
-                )
-                has_pending_review = any(ans.feedback.startswith("Needs manual review") for ans in written_answers)
-
-            records.append({
-                "student_id": student.id,
-                "student_name": student.get_full_name() or student.username,
-                "admission_number": student.admission_number or f"RU-2026-{student.id:03d}",
-                "year_of_study": student.year_of_study or 2,
-                "is_synthetic": is_synthetic,
-                "data_label": "Demo data" if is_synthetic else "Real Student",
-                "attempts_count": len(attempts),
-                "final_test_score": round(percentage, 1) if latest_attempt else None,
-                "raw_score": round(raw_score, 1) if latest_attempt else None,
-                "total_marks": total_marks,
-                "pass_threshold_marks": 35.0,
-                "final_test_passed": final_passed,
-                "has_pending_review": has_pending_review,
-                "grading_status": "Pending Written Review" if has_pending_review else ("Graded (Finalized)" if latest_attempt else "No Attempts"),
-                "is_approved_for_final_exam": is_approved,
-                "approval_status": "approved" if is_approved else ("eligible" if final_passed else "not_qualified"),
-                "approved_at": eligibility.approved_at if eligibility else None,
-                "approved_by": eligibility.approved_by.get_full_name() if eligibility and eligibility.approved_by else None,
-                "approval_notes": eligibility.notes if eligibility else "",
-                "attempts_history": [
-                    {
-                        "attempt_number": att.attempt_number,
-                        "score": att.score,
-                        "total_marks": att.total_marks,
-                        "percentage": att.percentage,
-                        "passed": (att.score >= 35.0) or (att.percentage >= 58.33),
-                        "completed_at": att.completed_at,
-                    }
-                    for att in attempts
-                ],
-            })
-
-        records.sort(key=lambda r: (r["is_synthetic"], r["student_name"]))
-
-        return Response({
-            "unit": {"id": unit.id, "code": unit.code, "name": unit.name},
-            "metrics": {
-                "total_enrolled": len(enrolments),
-                "final_test_passed_count": passed_count,
-                "approved_for_exam_count": approved_count,
-                "pending_approval_count": pending_count,
-            },
-            "records": records,
-        })
+        clearance_data = get_final_clearance_data(unit, semester)
+        return Response(clearance_data)
 
     def post(self, request, unit_id):
         try:
@@ -751,95 +662,41 @@ class LecturerFinalExamApprovalsView(views.APIView):
             return Response({"error": "Unit not found."}, status=status.HTTP_404_NOT_FOUND)
 
         student_id = request.data.get("student_id")
+        admission_number = request.data.get("admission_number")
+        identifier = student_id or admission_number
+        if identifier is None:
+            return Response({"error": "Student identifier (student_id or admission_number) is required."}, status=status.HTTP_400_BAD_REQUEST)
+
         is_approved = request.data.get("is_approved", True) in [True, "true", "1", 1]
         notes = request.data.get("approval_notes", "").strip()
 
-        try:
-            student = User.objects.get(id=student_id, role=User.Role.STUDENT)
-        except User.DoesNotExist:
-            return Response({"error": "Student not found."}, status=status.HTTP_404_NOT_FOUND)
-
-        is_real_demo_student = (student.admission_number == "RU-2026-041" or student.username == "akamau")
-        if not is_real_demo_student and is_approved:
-            return Response(
-                {"error": "Validation Error: Demo data cannot be formally approved for university hall sitting."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        semester = AcademicSemester.objects.filter(status=AcademicSemester.Status.ACTIVE).first()
-        readiness_assessment = Assessment.objects.filter(
+        success, message = approve_candidate_for_final_exam(
             unit=unit,
-            assessment_type=Assessment.AssessmentType.FINAL_READINESS,
-        ).first()
-
-        eligibility, _ = FinalExamEligibility.objects.get_or_create(
-            student=student,
-            unit=unit,
-            semester=semester,
+            student_id_or_adm=identifier,
+            approver_user=request.user,
+            is_approved=is_approved,
+            notes=notes,
         )
 
-        if is_approved:
-            latest_attempt = AssessmentAttempt.objects.filter(
-                assessment=readiness_assessment,
-                student=student,
-                is_completed=True,
-            ).order_by("-completed_at").first()
+        if not success:
+            return Response({"error": message}, status=status.HTTP_400_BAD_REQUEST)
 
-            if not latest_attempt:
-                return Response(
-                    {"error": "Approval Denied: Student has not completed any final readiness test attempts."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+        log_audit_trail(
+            request,
+            "EXAM_APPROVAL_APPROVED" if is_approved else "EXAM_APPROVAL_REVOKED",
+            "FinalCandidateClearance",
+            str(identifier),
+            {"student": str(identifier), "action": "approve" if is_approved else "revoke"},
+        )
 
-            raw_score = latest_attempt.score
-            percentage = latest_attempt.percentage
-            qualifies = (raw_score >= 35.0) or (percentage >= 58.33)
+        semester = AcademicSemester.objects.filter(status=AcademicSemester.Status.ACTIVE).first()
+        clearance_data = get_final_clearance_data(unit, semester)
+        return Response({
+            "message": message,
+            "metrics": clearance_data["metrics"],
+            "records": clearance_data["records"],
+        })
 
-            if not qualifies:
-                return Response(
-                    {
-                        "error": f"Approval Denied: Student score ({raw_score:.1f}/60) does not meet the pass threshold of 35/60. Student must retake the readiness exam to qualify.",
-                        "qualified": False,
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            pending_written = StudentAnswer.objects.filter(
-                attempt=latest_attempt,
-                question__question_type=AssessmentQuestion.QuestionType.WRITTEN,
-                feedback__startswith="Needs manual review",
-            ).exists()
-            if pending_written:
-                return Response(
-                    {"error": "Approval Denied: Student has pending written responses that must be graded before approval."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            eligibility.lecturer_approved = True
-            eligibility.approved_at = timezone.now()
-            eligibility.approved_by = request.user
-            eligibility.status = FinalExamEligibility.Status.APPROVED
-            eligibility.notes = notes or f"Successfully approved for the final exam by Faculty Instructor {request.user.get_full_name()}."
-            eligibility.save()
-
-            log_audit_trail(request, "EXAM_APPROVAL_APPROVED", "FinalExamEligibility", eligibility.id, {"student": student.username, "score": raw_score})
-
-            return Response({
-                "message": "Successfully approved for the final exam",
-                "eligibility": FinalExamEligibilitySerializer(eligibility).data,
-            })
-        else:
-            eligibility.lecturer_approved = False
-            eligibility.status = FinalExamEligibility.Status.DISQUALIFIED
-            eligibility.notes = notes or "Approval revoked by faculty pending coursework or retake."
-            eligibility.save()
-
-            log_audit_trail(request, "EXAM_APPROVAL_REVOKED", "FinalExamEligibility", eligibility.id, {"student": student.username})
-
-            return Response({
-                "message": "Approval status updated: not approved.",
-                "eligibility": FinalExamEligibilitySerializer(eligibility).data,
-            })
 
 
 class LecturerApproveFinalExamView(views.APIView):

@@ -55,7 +55,9 @@ export const StudentDashboardPage: React.FC = () => {
   const { student, active_semester, active_unit, enrolled_units, readiness } = data;
   const labsPassed: number = readiness?.labs_completed ?? 0;
   const totalLabs: number = readiness?.total_labs ?? 0;
-  const progressPercentage = totalLabs > 0 ? Math.round((labsPassed / totalLabs) * 100) : 0;
+  const progressPercentage = totalLabs > 0 
+    ? (labsPassed === totalLabs ? 100 : Number(((labsPassed / totalLabs) * 100).toFixed(1))) 
+    : 0;
   const nextLab = readiness?.next_required_lab;
   const unlocked: boolean = !!readiness?.unlocked;
   const activeUnitId = active_unit?.id;
@@ -104,7 +106,7 @@ export const StudentDashboardPage: React.FC = () => {
               <span className="text-xs font-bold uppercase tracking-wider text-brand-700">Laboratory Progress</span>
               <div className="text-2xl font-extrabold text-brand-900 mt-0.5" data-testid="lab-progress">
                 {labsPassed}/{totalLabs}{" "}
-                <span className="text-slate-500 text-sm font-medium">labs completed</span>
+                <span className="text-slate-500 text-sm font-medium">labs completed ({progressPercentage}%)</span>
               </div>
             </div>
             <span className="text-xs font-bold px-3 py-1 rounded-full bg-brand-50 text-brand-800 border border-brand-200 self-start sm:self-auto">
@@ -130,10 +132,15 @@ export const StudentDashboardPage: React.FC = () => {
               <div className="flex items-start gap-3">
                 <FlaskConical className="w-5 h-5 text-gold-600 mt-0.5 shrink-0" />
                 <div>
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-gold-600">
-                    {nextLab.is_readiness_gate ? "Next required lab" : "Outstanding lab"}
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-gold-600">
+                      {nextLab.is_readiness_gate ? "Next required lab" : "Outstanding lab"}
+                    </span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                      Pending / In Progress
+                    </span>
                   </div>
-                  <div className="text-sm font-bold text-brand-900">{nextLab.title}</div>
+                  <div className="text-sm font-bold text-brand-900 mt-0.5">{nextLab.title}</div>
                   <p className="text-xs text-slate-600 mt-0.5">
                     {nextLab.is_readiness_gate
                       ? "Pass this lab (75% or above) to unlock the Final Readiness Test."
