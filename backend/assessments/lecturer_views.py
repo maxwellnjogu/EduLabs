@@ -36,6 +36,7 @@ from .gemini_service import (
     GeminiError,
 )
 from learning.demo_sdlc_content import (
+    SDLC_30_EASY_QUESTIONS,
     WEEK1_LAB_MCQS,
     WEEK1_LAB_FLASHCARDS,
     WEEK1_LAB_WRITTEN,
@@ -243,6 +244,46 @@ class LecturerGenerateDemoContentView(views.APIView):
 
             elif is_builder_workflow:
                 # SDLC Lab 1 Assessment Builder workflow (Local pre-built SDLC content, NO Gemini/paid API calls)
+                # For the SDLC lab assessment (Week 1 / Assessment 1), populate all 30 easy SDLC questions (30 marks total)
+                if assessment.id == 1 or (assessment.week and assessment.week.week_number == 1):
+                    for q_idx, item in enumerate(SDLC_30_EASY_QUESTIONS, 1):
+                        total_calc_marks += 1.0
+                        q_obj = AssessmentQuestion.objects.create(
+                            assessment=assessment,
+                            question_type=AssessmentQuestion.QuestionType.MCQ,
+                            prompt=item["prompt"],
+                            marks=1.0,
+                            timer_seconds=item.get("timer_seconds", 15),
+                            topic_tag=item.get("topic_tag", "SDLC Basics"),
+                            explanation=item.get("explanation", ""),
+                            config={"difficulty": item.get("difficulty", "Easy")},
+                            order=q_idx,
+                            is_active=True,
+                        )
+                        for opt_idx, opt_data in enumerate(item.get("options", []), 1):
+                            AssessmentOption.objects.create(
+                                question=q_obj,
+                                option_text=opt_data["text"],
+                                is_correct=bool(opt_data.get("is_correct", False)),
+                                order=opt_idx,
+                            )
+                    assessment.total_marks = 30.0
+                    assessment.passing_threshold = 70.0
+                    assessment.readiness_gate = True
+                    assessment.version = (assessment.version or 1) + 1
+                    assessment.status = Assessment.Status.DRAFT
+                    assessment.save()
+                    return Response(
+                        {
+                            "message": "30 beginner-friendly SDLC questions successfully generated.",
+                            "assessment": AssessmentSerializer(assessment).data,
+                            "questions_generated": 30,
+                            "total_marks": 30.0,
+                            "mode": "sdlc_30_easy",
+                        },
+                        status=status.HTTP_201_CREATED,
+                    )
+
                 activities = get_prepared_sdlc_activities(selected_modes, mode_configs)
 
                 # 1. Knowledge Check: Trivia (Single Choice)

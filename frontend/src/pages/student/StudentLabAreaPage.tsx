@@ -453,7 +453,42 @@ export const StudentLabAreaPage: React.FC = () => {
             })}
           </div>
 
-          <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+          {/* Question Palette / Direct Numbered Navigation */}
+          {triviaQuestions.length > 1 && (
+            <div className="pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                  Question Palette ({Object.keys(mcqAnswers).length} of {triviaQuestions.length} answered)
+                </span>
+                <span className="text-[10px] text-slate-400">Click any number to jump directly</span>
+              </div>
+              <div className="flex flex-wrap gap-1.5 p-2 bg-slate-50/80 rounded-xl border border-slate-200">
+                {triviaQuestions.map((q: any, idx: number) => {
+                  const isCurrent = currentTriviaIdx === idx;
+                  const isAnswered = mcqAnswers[q.id] !== undefined;
+                  return (
+                    <button
+                      key={q.id || idx}
+                      type="button"
+                      onClick={() => setCurrentTriviaIdx(idx)}
+                      className={`w-7 h-7 rounded-lg text-xs font-bold transition flex items-center justify-center ${
+                        isCurrent
+                          ? "bg-blue-600 text-white ring-2 ring-blue-500/40 shadow-sm"
+                          : isAnswered
+                          ? "bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold"
+                          : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
+                      }`}
+                      title={`Question ${idx + 1}: ${q.prompt?.slice(0, 45)}...`}
+                    >
+                      {idx + 1}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
             <button
               onClick={() => setCurrentTriviaIdx((p) => Math.max(0, p - 1))}
               disabled={currentTriviaIdx === 0}
@@ -477,11 +512,14 @@ export const StudentLabAreaPage: React.FC = () => {
                   if (multiSelectQuestions.length > 0) setActiveSection("multi_select");
                   else if (fillBlankQuestions.length > 0) setActiveSection("fill_blanks");
                   else if (flashcardQuestions.length > 0) setActiveSection("flashcards");
+                  else {
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                  }
                 }}
-                className="px-4 py-2 text-xs font-bold bg-teal-600 hover:bg-teal-700 text-white rounded-xl flex items-center gap-1 shadow-sm"
+                className="px-4 py-2 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl flex items-center gap-1 shadow-sm"
               >
-                <span>Proceed to Next Activity</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>Proceed to Review & Submit</span>
+                <CheckCircle2 className="w-4 h-4" />
               </button>
             )}
           </div>

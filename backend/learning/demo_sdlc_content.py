@@ -786,6 +786,7 @@ SDLC_30_EASY_QUESTIONS = [   {   'difficulty': 'Easy',
         'topic_tag': 'Development Models'}]
 
 WEEK1_LAB_MCQS = SDLC_30_EASY_QUESTIONS
+PREPARED_SDLC_TRIVIA = SDLC_30_EASY_QUESTIONS
 # 5 Flashcards for SDLC Lab 1 (ungraded revision)
 WEEK1_LAB_FLASHCARDS = [
     {
